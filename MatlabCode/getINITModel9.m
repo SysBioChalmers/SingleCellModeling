@@ -1,11 +1,13 @@
+%This is the main ftINIT function
+%Metabolomics is currently not supported, but will be when implemented into RAVEN.
 function [model, metProduction, addedRxnsForTasks, deletedRxnsInINIT, taskReport, fullMipRes] = getINITModel9(prepData, tissue, celltype, hpaData, transcrData, metabolomicsData, rxnsToIgnorePatternStep1, rxnsToIgnorePatternStep3, removeGenes, useScoresForTasks, milpSkipMets, allowExcretion, printReport, params, paramsFT)
-% getINITModel2
+% getINITModel9
 %   Generates a model using the INIT algorithm, based on proteomics and/or
 %   transcriptomics and/or metabolomics and/or metabolic tasks.
 %   This is the newer version, which has updated handling of gene rules to
 %   differentiate between isozymes and enzyme complexes.
 %
-%   prepData            
+%   prepData            The prepdata for the model.
 %   tissue              tissue to score for. Should exist in either
 %                       hpaData.tissues or transcrData.tissues
 %   celltype            cell type to score for. Should exist in either
@@ -37,6 +39,17 @@ function [model, metProduction, addedRxnsForTasks, deletedRxnsInINIT, taskReport
 %                       should be plotted (opt, default = false)
 %   metabolomicsData    cell array with metabolite names that the model
 %                       should produce (opt, default [])
+%   rxnsToIgnorePatternStep1 Pattern describing which reactions to ignore in step 1 and 2:
+%                       [b1,b2,b3,b4,b5,b6,b7,b8], bx is either 0 or 1, where 1 means that the group is excluded.
+%                       b1 - Exchange rxns
+%                       b2 - Import rxns without GPRs (from s into the cell)
+%                       b3 - Simple transport reactions without GPRs (moves one metabolite between compartments)
+%                       b4 - Advanced transport reactions without GPRs (moves metabolites between compartments, more complex function such as antiporter)
+%                       b5 - Spontaneous reactions
+%                       b6 - Reactions in the s compartment without GPRs
+%                       b7 - Customly specified rxns (sent in when generating prepData)
+%                       b8 - All rxns without GPRs
+%   rxnsToIgnorePatternStep3 - same as above, but for step 3. Step 3 is only run if this differs from rxnsToIgnorePatternStep1
 %   removeGenes         if true, low-abundance genes will be removed from
 %                       grRules, unless they are the only gene associated 
 %                       with a reaction, or a subunit of an enzyme complex
@@ -45,11 +58,11 @@ function [model, metProduction, addedRxnsForTasks, deletedRxnsInINIT, taskReport
 %                       genes that were associated only with removed 
 %                       reactions will not be present in the final model.
 %                       (opt, default true).
-%   taskFile            a task list in Excel format. See parseTaskList for
-%                       details (opt, default [])
 %   useScoresForTasks   true if the calculated reaction scored should be 
 %                       used as weights when fitting to tasks (opt, default
 %                       true)
+%   milpSkipMets        Defines metabolites that will be removed from the model before running ftINIT (for example water)
+%   allowExcretion      Allows excretion of metabolites in step 1 and 2.
 %   printReport         true if a report should be printed to the screen
 %                       (opt, default true)
 %   params              parameter structure as used by getMILPParams. This
@@ -77,8 +90,6 @@ function [model, metProduction, addedRxnsForTasks, deletedRxnsInINIT, taskReport
 %   deletedDeadEndRxns      cell array of reactions deleted because they
 %                           could not carry flux (INIT requires a
 %                           functional input model)
-%   deletedRxnsInINIT       cell array of the reactions which were deleted by
-%                           the INIT algorithm
 %   taskReport              structure with the results for each task
 %   	id                  cell array with the id of the task
 %       description         cell array with the description of the task
@@ -87,6 +98,7 @@ function [model, metProduction, addedRxnsForTasks, deletedRxnsInINIT, taskReport
 %                           reactions for the task
 %       gapfill             cell array of cell arrays of reactions included
 %                           in the gap-filling for the task
+%   fullMipRes              The solver results from the last MILP step run
 %
 %   This is the main function for automatic reconstruction of models based
 %   on the INIT algorithm (PLoS Comput Biol. 2012;8(5):e1002518). Not all
@@ -127,7 +139,7 @@ if nargin < 10 || isempty(useScoresForTasks)
 end
 
 if nargin < 11 || isempty(milpSkipMets)
-    milpSkipSimpleMets = [];
+    milpSkipMets = [];
 end
 
 if nargin < 12 || isempty(allowExcretion)
@@ -174,15 +186,6 @@ origRxnScores(origRxnScores > -0.1 & origRxnScores <= 0) = -0.1;%we don't want r
 origRxnScores(origRxnScores < 0.1 & origRxnScores > 0) = 0.1;
 
 rxnsToIgnoreStep1 = getRxnsFromPattern(rxnsToIgnorePatternStep1, prepData);
-%temp - test to remove all reactions that exists purely in p, l, r, g, and n
-%This of course speeds things up...
-%comps = find(ismember(prepData.refModel.comps, {'p';'l';'r';'g';'n';'m'}));
-%suchMets = ismember(prepData.refModel.metComps, comps);
-%pureRxns = (sum(prepData.refModel.S(suchMets,:) ~= 0 ,1) > 0 & sum(prepData.refModel.S(~suchMets,:) ~= 0 ,1) == 0).';
-%rxnsToIgnore = rxnsToIgnore | pureRxns;
-%test to remove all positive reversible (same effect as using an irrev model)
-%posirr = prepData.refModel.rev == 1 & origRxnScores > 0;
-%rxnsToIgnore = rxnsToIgnore | posirr;
 
 if isfield(params, 'multNegScores')
     selNeg = origRxnScores < 0;
@@ -203,7 +206,6 @@ if (~isempty(milpSkipMets))
         metsToRem = metsToRem & ~ismember(mm.metComps, compsToKeep);
         mm.S(metsToRem,:) = 0;
     end    
-    %TODO: Implement advanced mets part with ATP, NADH etc. That speeds up the calculation substantially, but it is a bit tricky.
 end
 
 
@@ -240,13 +242,9 @@ if mipGap > 0.01
     dispEM(['MipGap very large: ' num2str(mipGap) ', increase time limit']);
 end
 %second step
-%sum(rxnsTurnedOn1)%1943
-%sum(rxnsTurnedOn1 & (mm.rev == 1))%25
-%rxnScores(rxnsTurnedOn1);
 remFromProblem = rxnsTurnedOn1;
 rxnScores2 = rxnScores;
 rxnScores2(remFromProblem) = 0;
-%newEssential = unique([prepData.essentialRxns;mm.rxns(makeEssential)]);
 
 mipGap = 1;
 newParams = params;
@@ -276,8 +274,6 @@ if mipGap > 0.01
     dispEM(['MipGap very large: ' num2str(mipGap) ', increase time limit']);
 end
 
-%rxnScores2(rxnsTurnedOn2)
-
 %the third step - if specified, we here allow for removal of some of the reactions that were not included in the problem earlier
 %first check that the step 3 pattern covers less rxns
 if any ((rxnsToIgnorePatternStep1 - rxnsToIgnorePatternStep3) < 0)
@@ -299,11 +295,8 @@ if any(rxnsToIgnorePatternStep1 ~= rxnsToIgnorePatternStep3) %If these are the s
     
     fluxes = fluxes2;
     fluxes(fluxes == 0) = fluxes1(fluxes == 0);
-    %sum(fluxes(rxnsOn & rev) == 0) %should be 0, ok
     toRev = rxnsOn & rev & fluxes < 0;
     minModelMod = reverseRxns(prepData.minModel, prepData.minModel.rxns(toRev));
-    %constructEquations(minModelMod,minModelMod.rxns(toRev)) %looks good
-    %constructEquations(prepData.minModel,minModelMod.rxns(toRev)) %looks good
 
     %Then make them irreversible
     minModelMod.rev(toRev) = 0;
@@ -383,11 +376,6 @@ if ~isempty(prepData.taskStruct)
     %We changed strategy and instead include all rxns except the exchange rxns in the ref model
     %But we do keep the exchange rxns that are essential.
     %Let's test to remove all, that should work
-    %exchRxns = getExchangeRxns(refModel);
-    %exchRxnsNotEss = exchRxnsNotEss(~ismember(exchRxnsNotEss, prepData.essentialRxns));
-    %refModelNoExc = removeReactions(refModel,exchRxnsNotEss,true,true);
-    %refModelNoExc = removeReactions(refModel,exchRxns,true,true);
-    
     
     %At this stage the model is fully connected and most of the genes with
     %good scores should have been included. The final gap-filling should
@@ -402,7 +390,6 @@ if ~isempty(prepData.taskStruct)
     initModelNoExc = removeReactions(addBoundaryMets(initModel),exchRxns,true,true);
     
     if useScoresForTasks == true
-        %refRxnScores = scoreComplexModel(refModelNoExc,hpaData,transcrData,tissue,celltype);%FIXME: This can probably be avoided to save performance
         %map the rxn scores to the model without exchange rxns
         [~,ia,ib] = intersect(refModelNoExc.rxns,prepData.refModel.rxns);
         rxnScores2nd = NaN(length(refModelNoExc.rxns),1);
@@ -440,59 +427,22 @@ model = outModel;
 % reactions from the reference model are added, except for those which
 % involve metabolites that are not in the model.
 
-%TODO: For now, we include all exchange rxns in the final model - it is questionable if we should remove the ones that are not used,
-%it may make it more difficult to simulate different tINIT models with the same inputs.
 
 
-% First delete any included exchange reactions in order to prevent the order
-% from changing
-%{
-model = removeReactions(model,getExchangeRxns(model));
-
-% Create a model with only the exchange reactions in refModel
-excModel = removeReactions(refModel,setdiff(refModel.rxns,getExchangeRxns(refModel)),true,true);
-
-% Find the metabolites there which are not exchange metabolites and which do
-% not exist in the output model
-I = ~ismember(excModel.mets,model.mets) & excModel.unconstrained == 0;
-
-% Then find those reactions and delete them
-[~, J] = find(excModel.S(I,:));
-excModel = removeReactions(excModel,J,true,true);
-
-% Merge with the output model
-model = mergeModels({model;excModel},'metNames');
-model.id = 'INITModel';
-model.description = ['Automatically generated model for ' tissue];
-if any(celltype)
-    model.description = [model.description ' - ' celltype];
-end
-
-if printReport == true
-    printScores(model,'Final model statistics',hpaData,transcrData,tissue,celltype);
-end
-%}
-
-%TODO: NOT SURE ABOUT THE TASK REPORT THINGS BELOW, CHECK LATER
+%TODO: NOT SURE ABOUT THE TASK REPORT THINGS BELOW, INVESTIGATE WHAT THIS IS USED FOR
+% The task analysis should probably be done separately, for implementation in RAVEN, remove this part.
 % Add information about essential reactions and reactions included for
 % gap-filling and return a taskReport
 taskReport = prepData.taskReport;
 if ~isempty(prepData.taskStruct)
     I = find(taskReport.ok); %Ignore failed tasks
     for i = 1:numel(I)
-        %taskReport.essential{I(i),1} = cModel.rxns(essentialRxnMat(:,I(i)));
         taskReport.gapfill{I(i),1} = refModelNoExc.rxns(addedRxnMat(:,i));
     end
 else
     taskReport = [];
 end
 
-
-%Not needed, we regenerate the model below anyway
-%Fix grRules and reconstruct rxnGeneMat
-%[grRules,rxnGeneMat] = standardizeGrRules(model,true);
-%model.grRules = grRules;
-%model.rxnGeneMat = rxnGeneMat;
 
 %Start from the original model, and just remove the reactions that are no longer there (and keep exchange rxns). The model we got out
 %from the problem is not complete, it doesn't have GRPs etc.

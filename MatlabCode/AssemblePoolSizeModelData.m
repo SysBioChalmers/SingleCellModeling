@@ -1,3 +1,4 @@
+%Assembles the data for Fig 2.1 A and some associated supplementary plots
 cd 'C:/Work/MatlabCode/projects/SingleCellModeling/SingleCellModeling/MatlabCode'
 
 hcatModels = {};

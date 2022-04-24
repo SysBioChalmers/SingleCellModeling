@@ -1,3 +1,4 @@
+%Converts a reaction score to the gene expression required to get that reaction score, if the GPR is only a single gene
 function expr=getExprForRxnScore(scores, threshold)
 %this function returns the expression that will give the scores sent in when sent to scoreComplexModel
 %this is useful for writing test code

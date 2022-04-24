@@ -1,3 +1,4 @@
+%Calculates the Jaccard index from reaction scores, where reactions scores >= 0 is seen as "on"
 function meanRes = calcJaccard(rxnScores, progrBarCtxt)
 
 if nargin < 2

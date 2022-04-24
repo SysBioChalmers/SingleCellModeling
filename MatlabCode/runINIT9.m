@@ -1,5 +1,5 @@
 function [deletedRxns,metProduction,res,turnedOnRxns,fluxes]=runINIT9(model,rxnScores,presentMets,essentialRxns,prodWeight,allowExcretion,remPosRev,params)
-% runINIT
+% runINIT9
 %	Generates a model using the INIT algorithm, based on proteomics and/or
 %   transcriptomics and/or metabolomics and/or metabolic tasks
 %
@@ -29,18 +29,11 @@ function [deletedRxns,metProduction,res,turnedOnRxns,fluxes]=runINIT9(model,rxnS
 %                   probably be "true", or a large proportion of the model
 %                   would be excluded for connectivity reasons
 %                   (opt, default false)
-%   noRevLoops      true if reversible reactions should be constrained to
-%                   only carry flux in one direction. This prevents
-%                   reversible reactions from being wrongly assigned as
-%                   connected (the forward and backward reactions can form a
-%                   loop and therefore appear connected), but it makes the
-%                   problem significantly more computationally intensive to
-%                   solve (two more integer constraints per reversible reaction)
-%                   (opt, default false)
+%   remPosRev       If true, the positive reversible reactions are removed from the problem.
+%                   This is used in step 1 of ftINIT (opt, default false)
 %   params          parameter structure as used by getMILPParams (opt,
 %                   default [])
 %
-%   outModel        the resulting model structure
 %   deletedRxns     reactions which were deleted by the algorithm
 %   metProduction   array that indicates which of the
 %                   metabolites in presentMets that could be
@@ -48,18 +41,16 @@ function [deletedRxns,metProduction,res,turnedOnRxns,fluxes]=runINIT9(model,rxnS
 %                   -2: metabolite name not found in model
 %                   -1: metabolite found, but it could not be produced
 %                   1: metabolite could be produced
-%   fValue          objective value (sum of (the negative of)
-%                   reaction scores for the included reactions and
-%                   prodWeight*number of produced metabolites)
+%   res             The result from the MILP
+%   turnedOnRxns    The reactions determined to be present
+%   fluxes          The fluxes from the MILP
 %
 %   This function is the actual implementation of the algorithm. See
-%   getINITModel for a higher-level function for model reconstruction. See
-%   PLoS Comput Biol. 2012;8(5):e1002518 for details regarding the
-%   implementation.
+%   getINITModel9 for a higher-level function for model reconstruction. 
 %
-%   Usage: [outModel deletedRxns metProduction fValue]=runINIT(model,...
+%   Usage: [deletedRxns,metProduction,res,turnedOnRxns,fluxes]=runINIT9(model,...
 %           rxnScores,presentMets,essentialRxns,prodWeight,allowExcretion,...
-%           noRevLoops,params)
+%           remPosRev,params)
 
 if nargin<2
     rxnScores=zeros(numel(model.rxns),1);
@@ -126,7 +117,6 @@ end
 %Get the indexes of the essential reactions and remove them from the
 %scoring vector'
 essential = ismember(model.rxns,essentialRxns);
-%essential = ismember(model.rxns,essentialRxns) | (model.rev == 0 & rxnScores > 0); %adds all positive reversible as essential
 
 essentialIndex=find(essential);
 
@@ -137,7 +127,7 @@ essentialIndex=find(essential);
 %This is to deal with the fact that there is no compartment info regarding
 %the presentMets. This modifies the irrevModel structure, but that is fine
 %since it's the model structure that is returned.
-%TODO: implement this at some point
+%TODO: This is not yet implemented (metaboliomics support)
 if any(pmIndexes)
     irrevModel.metNames=upper(irrevModel.metNames);
     metsToAdd.mets=strcat({'FAKEFORPM'},num2str(pmIndexes));
@@ -171,9 +161,6 @@ end
 nMets=numel(model.mets);
 nRxns=numel(model.rxns);
 nRxnsWithOnOff = nRxns;
-%nEssential=numel(essentialIndex);
-%nNonEssential=nRxns-nEssential;
-%nonEssentialIndex=setdiff(1:nRxns,essentialIndex);
 
 %Reactions with score 0 will just be left in the model, and will not be part of the problem (but can carry flux).
 %It is possible to set score = 0 for e.g. spontaneous reactions, exchange rxns, etc., which may not be that interesting
@@ -351,7 +338,7 @@ else
 end
 %We still don't know which of the presentMets that can be produced. Go
 %through them, force production, and see if the problem can be solved
-%FIXME -FIX THIS LATER!!!
+%TODO: Fix this - metabolomics is currently not supported!
 for i=1:numel(pmIndexes)
     prob.blc(numel(irrevModel.mets)-numel(pmIndexes)+i)=1;
     prob.lb=[prob.blx; prob.blc];
@@ -369,11 +356,6 @@ end
 params.IntFeasTol = 10^-8; %experiment with this value
 %Set MIPGap as well as the time limit here - default is 10^-4, we could probably use a higher value, say 0.002 or something
 % solve problem
-
-%prob2 = prob;
-%prob2.c = zeros(length(prob2.c),1);
-%prob2.c(essIrrevRxns) = -1;
-%res2 = optimizeProb(prob2,params);
 
 res=optimizeProb(prob,params);
 
@@ -394,35 +376,16 @@ onoff(posRevRxns) = res.full(onoffPosRev);
 onoff(negIrrevRxns) = res.full(onoffNegIrrev);
 onoff(negRevRxns) = res.full(onoffNegRev);
 
-onoff2 = zeros(nRxnsWithOnOff,1);%standard is off, i.e. all reactions not included in the problem + ess is off
-onoff2(posIrrevRxns) = res.full(onoffPosIrrev);
-onoff2(posRevRxns) = res.full(onoffPosRev);
-onoff2(negIrrevRxns) = res.full(onoffNegIrrev);
-onoff2(negRevRxns) = res.full(onoffNegRev);
-
-
 %investigate a bit
-problematic = onoff < 0.99 & onoff > 0.01;
-onoff(problematic)
-%onoff(problematic & posRxns)
-%onoff(problematic & negRxns)
+%problematic = onoff < 0.99 & onoff > 0.01;
+%onoff(problematic)
 
 %so, it is only positive that are problematic. Likely because the 0.1 is too large. Test to change to 0.01
-unique(onoff(onoff < 0.99 & onoff > 0.01))
-
-%fluxes = res.full(1:nRxnsWithOnOff);
-%problFluxes = fluxes > 0 & negRxns & onoff < 0.01;
-%unique(fluxes(problFluxes))
+%unique(onoff(onoff < 0.99 & onoff > 0.01))
 
 %Get all reactions used in the irreversible model
 deletedRxns=(onoff < 0.5).';
 turnedOnRxns=(onoff2 >= 0.5).';
 
 fluxes = res.full(1:nRxns);
-
-%removedRxns=(onoff < 0.5).';
-%addedRxns=(onoff2 >= 0.5).';
-
-%deletedRxns=milpModel.rxns(removedRxns);
-%turnedOnRxns = milpModel.rxns(addedRxns);
 end

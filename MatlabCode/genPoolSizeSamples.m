@@ -1,3 +1,4 @@
+%Generates random collections of cells that are pooled to pseudo-bulk samples.
 function [samples, poolSizes] = genPoolSizeSamples(ds, minSizeSet, maxSizeSet, numPoints, repetitions, progrBarCtxt)
 %This function generates paired samples next to each other. If we have 2 repetitions and three points, the samples will 
 %be distributed as: p1r1A p1r1B p1r2A p1r2B p2r1A p2r1B p2r2A p2r2B p3r1A p3r1B p3r2A p3r2B 

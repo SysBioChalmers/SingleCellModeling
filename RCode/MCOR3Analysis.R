@@ -102,8 +102,6 @@ seurObj <- RunPCA(seurObj, features = VariableFeatures(object = seurObj))
 seurObj <- FindNeighbors(seurObj, dims = 1:15)
 seurObj <- FindClusters(seurObj, resolution = 0.5)
 seurObj <- RunUMAP(seurObj, dims = 1:15)
-#pA = DimPlot(seurObj)
-#pA
 
 pA1 = DimPlot(seurObj, group.by = "authors_cluster")
 pA1 = pA1 + labs(x="UMAP x", y="UMAP y", title="All genes")

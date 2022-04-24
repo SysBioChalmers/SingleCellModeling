@@ -1,3 +1,4 @@
+%Part of ftINIT, optimized version of the previous function from RAVEN.
 function [outModel, addedRxns]=fitTasks(model,refModel,inputFile,printOutput,rxnScores,taskStructure,params)
 % fitTasks
 %   Fills gaps in a model by including reactions from a reference model,

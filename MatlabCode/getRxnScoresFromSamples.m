@@ -1,3 +1,4 @@
+%Gets reaction scores for each sample in a samples object
 function rxnScores = getRxnScoresFromSamples(s, model, tINITThreshold, progrBarCtxt)
 
 if nargin < 4

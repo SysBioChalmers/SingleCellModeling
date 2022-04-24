@@ -1,3 +1,6 @@
+%Generates the pool size data for Fig. 2A-C.
+%Note that this code uses SingleCellToolbox (https://github.com/SysBioChalmers/SingleCellToolbox). 
+%See https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0239495 for details
 cd 'C:/Work/MatlabCode/projects/SingleCellModeling/SingleCellModeling/MatlabCode'
 %load('tINIT_preprocess_inputs')
 %prep for scoring
@@ -98,10 +101,10 @@ rng(1);
 numPoints = 10;
 numRep = 20;
 [psSamplesHcat,poolSizesHcat] = genPoolSizeSamples(hcatlim, 150, 10000, numPoints, numRep);
-psSamplesHcat.writeToTextFile('../data/hcatPSSamples.txt');
+psSamplesHcat.writeToTextFile('../data/PoolSize/hcatPSSamples.txt');
 
 [psSamplesT68k,poolSizesT68k] = genPoolSizeSamples(t68k, 150, 10000, numPoints, numRep);
-psSamplesT68k.writeToTextFile('../data/t68kPSSamples.txt');
+psSamplesT68k.writeToTextFile('../data/PoolSize/t68kPSSamples.txt');
 d = struct();
 d.poolSizesHcat = poolSizesHcat;
 d.poolSizesT68k = poolSizesT68k;
@@ -146,8 +149,8 @@ cellsPerSample %at least 10000 per patient, ok
 %       18016
 
 %save for running tINIT
-save('../data/pseudoBulkModelData.mat','s');
-s.writeToTextFile('../data/pseudoBulkModelDataCPM.txt');
+save('../data/PoolSize/pseudoBulkModelData.mat','s');
+s.writeToTextFile('../data/PoolSize/pseudoBulkModelDataCPM.txt');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Generate reaction scores (takes a few hours to run...)

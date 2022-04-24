@@ -1,3 +1,4 @@
+%Same as genPoolSizeSamples, but draws from two populations, a certain fraction from each
 function [samplesList, poolSizes] = genPoolSizeSamplesWithContamination(ds, dsCont, minSizeSet, maxSizeSet, numPoints, repetitions, contFrac, progrBarCtxt)
 
 if nargin < 8

@@ -1,5 +1,9 @@
 function rxnScores3D = rxnScoresTo3D(rxnScores, xParams)
-%x params here is for example pool sizes or noise magnitude
+% rxnScores3D = rxnScoresTo3D(rxnScores, xParams)
+% Reshapes a 2D matrix with pairs and repetitions into a 3D matrix
+% rxnScores   the 2D matrix
+% xParams     pool sizes
+% rxnScores3D The 3D matrix
 
 rxns = size(rxnScores,1);
 points = length(xParams);

@@ -14,10 +14,6 @@ setwd("C:/Work/MatlabCode/projects/SingleCellModeling/SingleCellModeling")
   
   names = c("tINIT 2","tINIT 3")
   
-  # include the next two lines to compare biomass vs. all-task methods
-  # fnames <- c(fnames, paste('BMonly_results_', modelnames, '_DepMap_06.txt', sep=''))
-  # modelnames <- c(modelnames, modelnames)
-  
   gea_res = NULL
   for (i in 1:length(fns)) {
     x = read.delim(file = fns[i], sep='\t', stringsAsFactors=F)

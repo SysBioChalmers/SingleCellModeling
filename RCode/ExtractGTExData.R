@@ -184,11 +184,11 @@ write_tsv(tibble(tissAll), 'data/gtexIndSampTissuesQuantile.txt', col_names = FA
 
 
 #also TMM-normalize the HCA CB per sample data
-hcaPerSample = read_tsv('data/pseudoBulkModelDataCPM.txt') #here we assume that they have 1 M counts, which may be a bit of a stretch - I doubt it matters much though
+hcaPerSample = read_tsv('data/PoolSize/pseudoBulkModelDataCPM.txt') #here we assume that they have 1 M counts, which may be a bit of a stretch - I doubt it matters much though
 hcaPerSampleTMM = TMMNorm(hcaPerSample)
 mean(colSums(hcaPerSampleTMM[,-1]))#ok
 colnames(hcaPerSampleTMM)[1] = "gene"
 
-write_tsv(hcaPerSampleTMM, 'data/pseudoBulkModelDataTMM.txt')
+write_tsv(hcaPerSampleTMM, 'data/PoolSize/pseudoBulkModelDataTMM.txt')
 
 

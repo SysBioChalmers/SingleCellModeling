@@ -185,10 +185,6 @@ varBlock = [var1;var2;var3;var4];
 prob.A = [sBlock posBlock negBlock intBlock bBlock varBlock];
 prob.a = prob.A;%I think this is needed as well
 
-%a=[sparse(numel(irrevModel.mets),numel(indexes));speye(numel(indexes))*maxFlux];
-%prob.a=[prob.a a];
-%prob.ints.sub=numel(irrevModel.rxns)+1:numel(irrevModel.rxns)+numel(indexes);
-
 prob.c=[zeros(numel(model.rxns),1);zeros(numel(revIndexes)*2,1); scores(:);zeros(numel(model.mets) + numel(indexes),1)]; %Minimize the sum of reaction scores for reactions that are on
 
 %ub and lb, text copied from above

@@ -1,5 +1,5 @@
+%Part of ftINIT, optimized version of the previous function from RAVEN.
 function [addedRxns, newModel, exitFlag]=fillGapsOpt(tModel, origModel, tRefModel,allowNetProduction,supressWarnings,rxnScores,params)
-%%%%function [addedRxns, newModel, exitFlag]=fillGapsOpt(tModel, origModel, tRefModel,tIrrevRefModel,allowNetProduction,supressWarnings,rxnScores,rxnScoresIrrev,params)
 % fillGapsOpt
 %   Variant of fillGaps specially adapted to speed up generation of ftINIT models
 %

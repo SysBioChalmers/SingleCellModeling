@@ -1,4 +1,4 @@
-
+cd 'C:/Work/MatlabCode/projects/SingleCellModeling/SingleCellModeling/MatlabCode'
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Define test models
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -223,7 +223,6 @@ arrayData1.genes = testModel.genes;
 arrayData1.tissues = {'a'};
 arrayData1.levels = getExprForRxnScore(testRxnScores);
 arrayData1.threshold = 1;
-%tst1ResModel1 = getINITModel7(prepDataTest1,arrayData1.tissues{1},[],[],arrayData1,[],[1;1;1;1;1;1;1;0],true,true,[], true,false,testParams);
 tst1ResModel1 = getINITModel9(prepDataTest1,arrayData1.tissues{1},[],[],arrayData1,[],[1;1;1;1;1;1;1;0],[1;1;1;1;1;1;1;0],true,true,[], true,false,testParams);
 
 %We expect R1, R2, and R8 to be added since they have no GPRs and are exch/simple transport rxns
@@ -308,40 +307,37 @@ all(find(reversedRxns) == [6;9])%ok
 %constructEquations(testModel4)
 %constructEquations(reducedModel)
 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%T0005: makePartlyIrrevNoLoops - this is not used anymore
+%T0006: reverseRxns
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-irrev6 = convertToIrrev(testModel6);
-rxnsToHandle = find(testModel6.rev == 1 & testRxnScores6 > 0);
-rxnsToHandleRev = find(testRxnScores6(testModel6.rev == 1) > 0) + length(testModel6.rxns);%7, as it should be
-outModel = makePartlyIrrevNoLoops(irrev6, rxnsToHandle, rxnsToHandleRev, false(length(testModel6.mets)), 12);
-constructEquations(outModel) 
-%we just check this manually for now
-%a1 shall be fed by a5,a6,a7
-%a2 shall be fed by a6,a7, and may have a5(doesn't matter)
-%a3 shall be fed by a5,a7
-%a4 shall be fed by a5,a6, and may have a7(doesn't matter)
-%this is ok, we don't check any more for now
+%R1 = '=> a[s]';...
+%R3 = 'a[c] <=> b[c] + c[c]';...
 
-irrev5 = convertToIrrev(testModel5);
-rxnsToHandle = find(testModel5.rev == 1 & testRxnScores5 > 0);
-rxnsToHandleRev = find(testRxnScores5(testModel5.rev == 1) > 0) + length(testModel5.rxns);%12-17, as it should be
+tmpModel = reverseRxns(testModel, {'R1';'R3'});
+res = constructEquations(tmpModel, {'R1';'R3'});
+expRes = {'a[s] => ';'b[c] + c[c] <=> a[c]'}
+all(strcmp(res,expRes)) %ok
 
-outModel = makePartlyIrrevNoLoops(irrev5, rxnsToHandle, rxnsToHandleRev, false(length(testModel5.mets)), 12);
-constructEquations(outModel)
 
-%testModel5 = addRxns(testModel5,rxnsToAdd, 3, [], true, true);
-%testRxnScores5 = [1;-1;1;1;1;1;1;1;0;0];
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%T0007: rescaleModelForINIT
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+miniModel = struct();
+miniModel.S = [1,1000;-1,-1000];
+res = rescaleModelForINIT(miniModel,10);
+expRes = [1,10;-1,-10];
+all(all(res.S == expRes)) %ok
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Build a more complex model with transport etc.
+%% T0050 - Build a more complex model with transport etc.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% This is not a formal test case, but some testing to ensure the function on a larger model
-% It requires manual modification of the code in Human-GEM.
+% This is not a formal test case that can be easily run, but it has been run to confirm that the method works well on a larger model
+% It requires manual modification of the code in Human-GEM, which makes it a bit impractical to run.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 testModelL = struct();
@@ -350,7 +346,6 @@ testModelL.rxns = {};
 testModelL.S=[];
 testModelL.rev=[];
 testModelL.metNames = {'e1';'e2';'e3';'e4';'e5';'e6';'e7';'e8';'e9';'e1';'e2';'e3';'e4';'e5';'e6';'e7';'e8';'e9';'x1';'x2';'x3';'x4';'x5';'x6';'x7';'x8';'x9';'x10';'x11'};
-%testModelL.mets = {'s1';'s2';'s3';'s4';'s5';'s6';'s7';'s8';'s9';'e1';'e2';'e3';'e4';'e5';'e6';'e7';'e8';'e9';'x1';'x2';'x3';'x4';'x5';'x6';'x7';'x8';'x9';'x10';'x11'};
 testModelL.comps = {'s';'c'};
 testModelL.compNames = testModelL.comps;
 testModelL.metComps = [1;1;1;1;1;1;1;1;1;2;2;2;2;2;2;2;2;2;2;2;2;2;2;2;2;2;2;2;2];
@@ -361,14 +356,15 @@ testModelL.grRules = {};
 testModelL.rxnGeneMat = [];
 
 testModelL.genes = {'Ge1';'Ge2';'Ge4';'Ge5';'Ge7';'Ge9'; 'Gr1';'Gr2';'Gr3';'Gr5';'Gr6';'Gr7';'Gr8';'Gr9';'Gr10';'Gr11';'Gr12';'Gr14';'Gr15'};
-testModelLGeneScores = [3;-1;8;6;-5;5; 4;5;2;3;6;1;3;1;-3;1;3;1;2];
+testModelLGeneScores = [3; -1;   8;    6;    -5;    5;     4;    5;    2;    3;    6;    1;    3;    1;    -3;    1;     3;      1;    2];
 
 
 testModelL.ub = [];
 testModelL.lb = [];
 
 rxnsToAdd = struct();
-rxnsToAdd.rxns = {'S1';'S2';'S3';'S4';'S5';'S6';'S7';'S8';'S9';'E1';'E2';'E2b';'E3';'E4';'E5';'E6';'E7';'E8';'E9';'R1';'R2';'R3';'R4';'R5';'R6';'R7';'R8';'R9';'R10';'R11';'R12';'R13';'R14';'R15'};
+rxnsToAdd.rxns = {  'S1';'S2';'S3';'S4';'S5';'S6';'S7';'S8';'S9';'E1';'E2';'E2b';'E3';'E4';'E5';'E6';'E7';'E8';'E9';'R1';'R2';'R3';'R4';'R5';'R6';'R7';'R8';'R9';'R10';'R11';'R12';'R13';'R14';'R15'};
+rxnsToAdd.grRules = {'';  '';  '';  '';  '';  '';  '';  '';  ''; 'Ge1';'Ge2';'';'';'Ge4';'Ge5';'';'Ge7';'';'Ge9'; 'Gr1';'Gr2';'Gr3';'';'Gr5';'Gr6';'Gr7';'Gr8';'Gr9';'Gr10';'Gr11';'Gr12';'';'Gr14';'Gr15'};
 rxnsToAdd.equations = {'e1[s] <=>';...
                        'e2[s] <=>';...
                        'e3[s] <=>';...
@@ -404,7 +400,6 @@ rxnsToAdd.equations = {'e1[s] <=>';...
                        'x6[c] => x9[c]';... %R14
                        'x3[c] => x9[c]'... %R15
                        };
-rxnsToAdd.grRules = {'';'';'';'';'';'';'';'';''; 'Ge1';'Ge2';'';'';'Ge4';'Ge5';'';'Ge7';'';'Ge9'; 'Gr1';'Gr2';'Gr3';'';'Gr5';'Gr6';'Gr7';'Gr8';'Gr9';'Gr10';'Gr11';'Gr12';'';'Gr14';'Gr15'};
 testModelL = addRxns(testModelL,rxnsToAdd, 3);
 testModelL.c = [0;0;0;0;0;0;0;1;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0];%optimize for output flux, if this is used, not sure
 testModelL.rxnNames = testModelL.rxns;
@@ -442,6 +437,6 @@ init_modelOrig = getINITModel2(testModelL2,arrayDataL.tissues{1},[],[],arrayData
 %[~, deletedRxnsInINIT, metProduction] = runINIT(simplifyModel(cModel),rxnScores,metabolomicsData,essentialRxnsForTasks,0,false,true,params);
 init_modelOrigNoSecrOneDirOnly = getINITModel2(testModelL2,arrayDataL.tissues{1},[],[],arrayDataL,[],true,[],true,true,[],paramsL2);
 
-%The models init_modelOrigNoSecrOneDirOnly and mres2 are very similar, (only exch rxns differ, which is expected) 
-%init_modelOrig is quite different, and worse. So, the conclusion is that the new version does a pretty good job.
+%The models init_modelOrigNoSecrOneDirOnly and mres2 are very similar, (only one exch rxn differ, which is expected) 
+%init_modelOrig is quite different, with a lot of gaps, and worse. So, the conclusion is that the new version does a pretty good job.
 

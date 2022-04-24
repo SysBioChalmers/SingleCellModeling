@@ -1,3 +1,4 @@
+%Extracts the genes used in the model, which defines the metabolic genes
 cd 'C:/Work/MatlabCode/projects/SingleCellModeling/SingleCellModeling/MatlabCode'
 load('C:\Work\MatlabCode\components\MouseGEM\Mouse-GEM\model\Mouse-GEM.mat')%version 1.2.0
 
