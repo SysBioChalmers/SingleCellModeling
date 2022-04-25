@@ -70,7 +70,7 @@ pB
 
 
 #################################
-# Model distance using tINIT 3
+# Model distance using ftINIT
 #################################
 
 d = readMat("data/PoolSizeModelRes.mat")
@@ -96,7 +96,7 @@ pA = ggplot(df, aes(x = x, y = y, color=Dataset, linetype=Dataset, size=Dataset)
   scale_color_manual(values = col[c(1,2,4)], labels = labels) +
   scale_size_manual(values = rep(1,2,3), labels = labels) +
   #ylim(1,1.0015) +
-  ggplot2::labs(y=expression("Jaccard index"), x=expression(Log[2]*"(number of cells)"), title="tINIT 3") +
+  ggplot2::labs(y=expression("Jaccard index"), x=expression(Log[2]*"(number of cells)"), title="ftINIT") +
   ggplot2::theme_bw() +#+ ggplot2::theme(legend.position=legendPos, legend.title = element_blank())
   ggplot2::theme(panel.background = element_rect("white", "white", 0, 0, "white"), panel.grid.major= element_blank(),panel.grid.minor= element_blank()) +
   ggplot2::theme(legend.title = element_blank(),legend.position="bottom", legend.text=element_text(color='black', size=14)) + guides(colour = guide_legend(nrow = 2), size = guide_legend(nrow = 2), linetype = guide_legend(nrow = 2)) +
@@ -147,6 +147,11 @@ pC
 
 ggsave(
   paste0(fig____path, "Fig2A.png"),
+  plot = pA,
+  width = 4, height = 4.03, dpi = 300)
+
+ggsave(
+  paste0(fig____path, "Fig2A.svg"),
   plot = pA,
   width = 4, height = 4.03, dpi = 300)
 
