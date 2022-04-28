@@ -12,7 +12,7 @@ setwd("C:/Work/MatlabCode/projects/SingleCellModeling/SingleCellModeling")
   fns = c("data/geneEss_old_tINIT.txt",
           "data/geneEss_newalg.txt")
   
-  names = c("tINIT 2","tINIT 3")
+  names = c("tINIT","ftINIT")
   
   gea_res = NULL
   for (i in 1:length(fns)) {
@@ -44,7 +44,12 @@ setwd("C:/Work/MatlabCode/projects/SingleCellModeling/SingleCellModeling")
     paste0(figPath, "FigGeneEss.png"),
     plot = p1B,
     width = 2.5, height = 3, dpi = 300)
-
+  
+  ggsave(
+    paste0(figPath, "FigGeneEss.svg"),
+    plot = p1B,
+    width = 2.5, height = 3, dpi = 300)
+  
   
 ########################################
 # Fig. 1C - Execution times
@@ -55,7 +60,7 @@ setwd("C:/Work/MatlabCode/projects/SingleCellModeling/SingleCellModeling")
   tINITTimes = as.numeric(readMat("data/old_tinit_exec_times.mat")$old.tinit.exec.times2) #remove the 2 if you get an error here
   tINIT2Times = as.numeric(readMat("data/new_tinit_exec_times.mat")$new.tinit.exec.times)
   
-  names = c("tINIT 2","tINIT 3")
+  names = c("tINIT","ftINIT")
   
   # include the next two lines to compare biomass vs. all-task methods
   # fnames <- c(fnames, paste('BMonly_results_', modelnames, '_DepMap_06.txt', sep=''))
@@ -86,6 +91,11 @@ setwd("C:/Work/MatlabCode/projects/SingleCellModeling/SingleCellModeling")
   
   ggsave(
     paste0(figPath, "FigExecTimes.png"),
+    plot = p1C,
+    width = 2.5, height = 3, dpi = 300)
+  
+  ggsave(
+    paste0(figPath, "FigExecTimes.svg"),
     plot = p1C,
     width = 2.5, height = 3, dpi = 300)
   

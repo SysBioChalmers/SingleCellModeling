@@ -385,7 +385,7 @@ onoff(negRevRxns) = res.full(onoffNegRev);
 
 %Get all reactions used in the irreversible model
 deletedRxns=(onoff < 0.5).';
-turnedOnRxns=(onoff2 >= 0.5).';
+turnedOnRxns=(onoff >= 0.5).';
 
 fluxes = res.full(1:nRxns);
 end
