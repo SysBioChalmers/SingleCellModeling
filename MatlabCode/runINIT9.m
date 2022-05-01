@@ -376,6 +376,12 @@ onoff(posRevRxns) = res.full(onoffPosRev);
 onoff(negIrrevRxns) = res.full(onoffNegIrrev);
 onoff(negRevRxns) = res.full(onoffNegRev);
 
+onoff2 = zeros(nRxnsWithOnOff,1);%standard is off, i.e. all reactions not included in the problem + ess is off
+onoff2(posIrrevRxns) = res.full(onoffPosIrrev);
+onoff2(posRevRxns) = res.full(onoffPosRev);
+onoff2(negIrrevRxns) = res.full(onoffNegIrrev);
+onoff2(negRevRxns) = res.full(onoffNegRev);
+
 %investigate a bit
 %problematic = onoff < 0.99 & onoff > 0.01;
 %onoff(problematic)
@@ -385,7 +391,7 @@ onoff(negRevRxns) = res.full(onoffNegRev);
 
 %Get all reactions used in the irreversible model
 deletedRxns=(onoff < 0.5).';
-turnedOnRxns=(onoff >= 0.5).';
+turnedOnRxns=(onoff2 >= 0.5).';
 
 fluxes = res.full(1:nRxns);
 end
