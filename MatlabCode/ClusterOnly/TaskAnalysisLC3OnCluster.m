@@ -19,8 +19,8 @@ sampleNames = {'N_Alveolar Mac'; ...
                'T_tS2'};
 
 
-inFilename = ['LC3Data5/Bootstrap_' sampleNames{chunk} '_models.mat'];
-outFilename = ['LC3Data5/Bootstrap_' sampleNames{chunk} '_taskResults.mat'];
+inFilename = ['LC3/Run5/Bootstrap_' sampleNames{chunk} '_models.mat'];
+outFilename = ['LC3/Run5/Bootstrap_' sampleNames{chunk} '_taskResults.mat'];
 
 
 % add paths
@@ -37,11 +37,10 @@ models = x.models;
 taskReports = cell(length(models),1);
 allTasks = parseTaskList('metabolicTasks_Full.txt');
 
-parpool(8);
+%parpool(8);
 parfor i = 1:length(models)
-    modelTmp = addBoundaryMets(models{i});
     disp(['Running: ' num2str(i)])
-    [taskReports{i}, ~]=checkTasks(modelTmp,[],true,false,false,allTasks);
+    [taskReports{i}, ~]=checkTasks(closeModel(models{i}),[],true,false,false,allTasks);
 end
 
 save(outFilename, 'taskReports')

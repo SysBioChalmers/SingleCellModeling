@@ -66,6 +66,11 @@ ggsave(
   plot = pNew,
   width = 8, height = 9, dpi = 300)
 
+ggsave(
+  paste0(fig____path, "Fig1SupNewtINIT.svg"),
+  plot = pNew,
+  width = 8, height = 9, dpi = 300)
+
 ###################################################
 #Old tINIT
 ###################################################
@@ -120,6 +125,11 @@ pOld
 
 ggsave(
   paste0(fig____path, "Fig1SupOldtINIT.png"),
+  plot = pOld,
+  width = 8, height = 9, dpi = 300)
+
+ggsave(
+  paste0(fig____path, "Fig1SupOldtINIT.svg"),
   plot = pOld,
   width = 8, height = 9, dpi = 300)
 

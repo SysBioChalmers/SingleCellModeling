@@ -18,18 +18,17 @@ if nargin < 2
 end
 
 % add paths
-addpath('/apps/Common/Core/Gurobi/8.0.0/matlab');
 addpath(genpath('../../components/RAVEN'));
 addpath(genpath('../../components/COBRA'));
 addpath(genpath('../../components/Human-GEM'));
 
-setRavenSolver('gurobi');
+%setRavenSolver('gurobi');
 
 %% run tINIT
 
 
 %we replace the arraydata with the one from depmap
-load('arrayDataDepMap.mat')
+load('DepMap/arrayDataDepMap.mat')
 
 load('tINIT_inputs_human.mat');
 
@@ -63,7 +62,7 @@ n_models = numel(model_indx);
 
 % re-set to previous state if restart is requested
 if ( restart )
-    load(strcat('init_models-',num2str(chunk)));
+    load(strcat('DepMap/init_models_depmap15-',num2str(chunk)));
     start_ind = numel(init_models_depmap) + 1;
 else
     start_ind = 1;
@@ -91,7 +90,7 @@ for i = start_ind:n_models
     
     % save results
     if isnumeric(chunk)
-        filename = strcat('init_models_depmap15-',num2str(chunk));
+        filename = strcat('DepMap/init_models_depmap15-',num2str(chunk));
     else
         filename = 'init_models_depmap15-TEST';
     end

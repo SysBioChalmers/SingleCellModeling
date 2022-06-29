@@ -7,7 +7,7 @@
 
 
 # submit batch job using the line below:
-# sbatch -o run_lc3_tasks_run_5-%A-%a.log --array=1-17 run_lc3_tasks_run_5.sh
+# sbatch -o run_lc3_tasks_run_5-%A-%a.log --array=1-16 run_lc3_tasks_run_5.sh
 
 
 module load MATLAB/2019a

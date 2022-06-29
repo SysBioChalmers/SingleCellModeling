@@ -17,13 +17,6 @@ dataMat = table2array(T(:,2:end));
 load('../data/prepDataHumanGEM.mat');
 %prepDataHumanGEM
 
-paramsNewAlg = struct();
-paramsNewAlg.TimeLimit = 120;
-paramsNewAlg.MIPGap = 0.0004;
-
-milpSkipMets.simpleMets.mets = {'H2O';'Pi';'PPi';'H+';'O2';'CO2';'Na+'};
-milpSkipMets.simpleMets.compsToKeep = {'i'};
-
 
 arrayData = struct(); 
 arrayData.genes = genes;
@@ -37,7 +30,7 @@ arrayData.levels = arrayData.levels.*10^6./sum(arrayData.levels,1);
 models = cell(2,1);
 
 tic %we run this without step 3
-mres = getINITModel9(prepDataHumanGEM,arrayData.tissues{1},[],[],arrayData,[],[1;1;1;1;1;1;1;0],[1;1;1;1;1;1;1;0],true,true,milpSkipMets,true,false,paramsNewAlg);
+mres = ftINIT(prepDataHumanGEM,arrayData.tissues{1},[],[],arrayData,{},getHumanGEMINITSteps('1+0'),false,true,[]);
 toc
 mres.id = arrayData.tissues{1};
 models{1,1} = mres;
@@ -60,7 +53,7 @@ arrayData.levels = arrayData.levels.*10^6./sum(arrayData.levels,1);
 
 
 tic %we run this without step 3
-mres = getINITModel9(prepDataHumanGEM,arrayData.tissues{1},[],[],arrayData,[],[1;1;1;1;1;1;1;0],[1;1;1;1;1;1;1;0],true,true,milpSkipMets,true,false,paramsNewAlg);
+mres = ftINIT(prepDataHumanGEM,arrayData.tissues{1},[],[],arrayData,{},getHumanGEMINITSteps('1+0'),false,true,[]);
 toc
 mres.id = arrayData.tissues{1};
 models{2,1} = mres;

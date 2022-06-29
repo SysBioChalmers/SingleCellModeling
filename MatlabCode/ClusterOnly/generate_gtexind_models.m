@@ -5,10 +5,8 @@ if nargin < 2
 	threshold = 1;
 end
 
-%for debugging
-%cd 'C:/Work/MatlabCode/projects/HMASandbox/HMA_Sandbox/Single-cell Modeling/tINIT/clusterCode/code'%remove later
-%inFilename = 'LC3_data/Bootstrap_N_Alveolar Mac.txt';
-%outFilename = 'LC3_data/Bootstrap_N_Alveolar Mac_models.mat';
+%for debugging locally
+%cd C:/Work/MatlabCode/projects/SingleCellModeling/SingleCellModeling/data
 
 % add paths (comment out if you run locally)
 addpath(genpath('../../components/RAVEN'));
@@ -19,7 +17,7 @@ addpath(genpath('../../components/Human-GEM'));
 
 
 
-T = readtable('gtexIndSamp.txt');
+T = readtable('GTExInd/gtexIndSamp.txt');
 
 
 genes = T{:,1};
@@ -39,15 +37,6 @@ load('prepDataHumanGEMEns.mat');
 
 model_indx = 1:nModels; %length(s.sampleIds); %run with 15 samples for now
 
-paramsNewAlg = struct();
-paramsNewAlg.TimeLimit = 120;
-paramsNewAlg.MIPGap = 0.0004;
-
-milpSkipMets.simpleMets.mets = {'H2O';'Pi';'PPi';'H+';'O2';'CO2';'Na+'};
-milpSkipMets.simpleMets.compsToKeep = {'i'};
-
-
-%cd ../.. %temp
 
 arrayData = struct(); 
 arrayData.genes = genes;
@@ -82,16 +71,13 @@ for i = 1:nModels
      if (isempty(models{i}))
          disp(['running model: ' num2str(i)])
          tic %we run this without step 3
-         mres = getINITModel9(prepDataHumanGEMEns,arrayData.tissues{i},[],[],arrayData,[],[1;1;1;1;1;1;1;0],[1;1;1;1;1;1;1;0],true,true,milpSkipMets,true,false,paramsNewAlg);
+		 mres = ftINIT(prepDataHumanGEMEns,arrayData.tissues{i},[],[],arrayData,{},getHumanGEMINITSteps('1+0'),false,true,[]);
          toc
          mres.id = arrayData.tissues{i};
          models{i,1} = mres;
      end
 end
 
-%compareMultipleModels(models)
-
-%cd 'C:/Work/MatlabCode/projects/HMASandbox/HMA_Sandbox/Single-cell Modeling/tINIT/clusterCode/code'%remove later
 % save results
 if threshold == 1
 	fn = ['GTExInd/chunk_' num2str(chunk) '.mat'];

@@ -22,12 +22,12 @@ sampleNames = {'L2_3 IT';...
     'Vip Chat'};
     
 sampleName = sampleNames{chunk};
-infile = ['MCOR3Data5/Bootstrap_' sampleName '.txt'];
-outfile = ['MCOR3Data5/Bootstrap_' sampleName '_models.mat'];
+infile = ['MCOR3/Run5/Bootstrap_' sampleName '.txt'];
+outfile = ['MCOR3/Run5/Bootstrap_' sampleName '_models.mat'];
 
 
 %for debugging
-%cd 'C:/Work/MatlabCode/projects/HMASandbox/HMA_Sandbox/Single-cell Modeling/tINIT/clusterCode/code'%remove later
+%cd C:/Work/MatlabCode/projects/SingleCellModeling/SingleCellModeling/data
 
 % add paths
 addpath(genpath('../../components/RAVEN'));
@@ -48,13 +48,6 @@ nModels = size(dataMat,2);
 
 load('prepDataMouseGEM.mat');
 
-paramsNewAlg = struct();
-paramsNewAlg.TimeLimit = 120;
-paramsNewAlg.MIPGap = 0.0004;
-
-milpSkipMets.simpleMets.mets = {'H2O';'Pi';'PPi';'H+';'O2';'CO2';'Na+'};
-milpSkipMets.simpleMets.compsToKeep = {'i'};
-
 arrayData = struct(); 
 arrayData.genes = genes;
 arrayData.levels = dataMat;
@@ -69,7 +62,7 @@ models = cell(nModels,1);
 for i = 1:nModels
      disp(['running model: ' num2str(i)])
      tic %we run this without step 3
-     mres = getINITModel9(prepDataMouseGEM,arrayData.tissues{i},[],[],arrayData,[],[1;1;1;1;1;1;1;0],[1;1;1;1;1;1;1;0],true,true,milpSkipMets,true,false,paramsNewAlg);
+     mres = ftINIT(prepDataMouseGEM,arrayData.tissues{i},[],[],arrayData,{},getHumanGEMINITSteps('1+0'),false,true,[]);
      toc
      mres.id = arrayData.tissues{i};
      models{i,1} = mres;
@@ -77,4 +70,5 @@ end
 
 % save results
 save(outfile,'models');
+
 

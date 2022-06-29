@@ -25,7 +25,7 @@ addpath(genpath('../../components/Human-GEM'));
 %setRavenSolver('gurobi');
 
 %Note - I removed the first two lines in the file to simplify reading of the file
-T = readtable('gtexIndSamp.txt');
+T = readtable('GTExInd/gtexIndSamp.txt');
 genes = T{:,1};
 dataMat = table2array(T(:,3:end));
 

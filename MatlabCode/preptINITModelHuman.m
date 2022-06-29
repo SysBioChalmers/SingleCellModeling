@@ -1,8 +1,8 @@
 %Prep code for the old tINIT version
-cd 'C:/Work/MatlabCode/projects/HMASandbox/HMA_Sandbox/Single-cell Modeling/tINIT';
+cd 'C:/Work/MatlabCode/projects/SingleCellModeling/SingleCellModeling/MatlabCode';
 
 %load Human-GEM and tasks
-load('C:/Work/MatlabCode/components/human-GEM/Human-GEM/model/Human-GEM.mat')
+load('C:/Work/MatlabCode/components/human-GEM/Human-GEM_1_12/Human-GEM/model/Human-GEM.mat')
 %remove drug reactions from the model - we don't need them
 model = removeDrugReactions(ihuman);
 model = removeUnwantedReactions(model);
@@ -13,8 +13,11 @@ model = removeUnwantedReactions(model);
 AATriplets = getAATripletReactions(model,false);
 %length(AATriplets)%735
 model = removeReactions(model, AATriplets);
+%Remove the duplicate complex I reaction with ROS - it only causes problems to include it
+model = removeReactions(model, {'MAR13081'});
 
-taskStruct = parseTaskList('../data/metabolicTasks_Essential.txt');
+
+taskStruct = parseTaskList('C:/Work/MatlabCode/components/human-GEM/Human-GEM_1_12/Human-GEM/data/metabolicTasks/metabolicTasks_Essential.txt');
 
 model = addBoundaryMets(model);
 
@@ -33,6 +36,6 @@ arrayData.essentialRxnMat = essentialRxnMat;
 arrayData.threshold = 1;  % default value
 
 
-save('clusterCode/code/tINIT_inputs_human.mat','model','arrayData','taskStruct');
+save('../data/tINIT_inputs_human.mat','model','arrayData','taskStruct');
 
 

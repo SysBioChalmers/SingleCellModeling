@@ -1,4 +1,5 @@
 %This function is specific for model version 1.10 or earlier for Human1, perhaps a few later versions as well. Most of these, but maybe not all, have been curated in later model versions.
+%It was now adapted to version 1.12, while the mouse model is a previous version.
 function outModel=removeUnwantedReactions(inModel)
 
 
@@ -48,11 +49,12 @@ rxnsToRemDuplRevIrrev = { ...
     'MAR06858'; ...
     'MAR07191'};
 
-dupl = {'MAR08992';'MAR02490';'MAR04562';'MAR00464';'MAR07262';'MAR11310';'MAR10410';'MAR11269';'MAR11275';'MAR11273'};
-other  = {'MAR13081';'MAR08973'}; %one is a duplicate with ROS
+%These probably vary between the latest version of Human-GEM and Mouse-GEM, so just leave them in there
+%dupl = {'MAR08992';'MAR02490';'MAR04562';'MAR00464';'MAR07262';'MAR11310';'MAR10410';'MAR11269';'MAR11275';'MAR11273'};
+%other  = {'MAR13081';'MAR08973'}; %one is a duplicate with ROS
 %See the file "InvestigateDuplicates.m" for details
 
-toRem = [rxnsToRemDuplRevIrrev;dupl;other];
+toRem = rxnsToRemDuplRevIrrev;
 
 outModel = removeReactions(inModel, toRem);
 

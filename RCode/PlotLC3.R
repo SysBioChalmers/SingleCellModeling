@@ -78,6 +78,11 @@ ggsave(
   plot = pC,
   width = 6, height = 5, dpi = 300)
 
+ggsave(
+  paste0(fig____path, "Fig4C.eps"),
+  plot = pC,
+  width = 6, height = 5, dpi = 300)
+
 ####################################
 # Tasks comparison
 ####################################
@@ -146,6 +151,11 @@ p4D
 
 ggsave(
   paste0(fig____path, "Fig4D.png"),
+  plot = p4D,
+  width = 8.7, height = 5.4, dpi = 300)
+
+ggsave(
+  paste0(fig____path, "Fig4D.svg"),
   plot = p4D,
   width = 8.7, height = 5.4, dpi = 300)
 

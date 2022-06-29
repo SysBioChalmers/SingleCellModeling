@@ -13,9 +13,6 @@ dataMat(1:10,1:8)
 
 nModels = size(dataMat,2);
 
-%% run tINIT
-
-% load inputs generated using "prepare_tINIT_inputs" function
 load('../data/prepDataHumanGEM.mat');
 %prepDataHumanGEM
 
@@ -41,7 +38,7 @@ for i = 1:nModels
      if (isempty(models{i}))
          disp(['running model: ' num2str(i)])
          tic %we run this without step 3
-         mres = getINITModel9(prepDataHumanGEM,arrayData.tissues{i},[],[],arrayData,[],[1;1;1;1;1;1;1;0],[1;1;1;1;1;1;1;0],true,true,milpSkipMets,true,false,paramsNewAlg);
+         mres = ftINIT(prepDataHumanGEM,arrayData.tissues{i},[],[],arrayData,{},getHumanGEMINITSteps('1+0'),false,true,[]);
          toc
          mres.id = arrayData.tissues{i};
          models{i,1} = mres;
@@ -98,7 +95,7 @@ for i = 1:nModels
      if (isempty(models{i}))
          disp(['running model: ' num2str(i)])
          tic %we run this without step 3
-         mres = getINITModel9(prepDataHumanGEM,arrayData.tissues{i},[],[],arrayData,[],[1;1;1;1;1;1;1;0],[1;1;1;1;1;1;1;0],true,true,milpSkipMets,true,false,paramsNewAlg);
+         mres = ftINIT(prepDataHumanGEM,arrayData.tissues{i},[],[],arrayData,{},getHumanGEMINITSteps('1+0'),false,true,[]);
          toc
          mres.id = arrayData.tissues{i};
          models{i,1} = mres;

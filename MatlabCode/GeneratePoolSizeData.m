@@ -156,7 +156,7 @@ s.writeToTextFile('../data/PoolSize/pseudoBulkModelDataCPM.txt');
 %% Generate reaction scores (takes a few hours to run...)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-load('C:/Work/MatlabCode/components/human-GEM/Human-GEM/model/Human-GEM.mat')
+load('C:/Work/MatlabCode/components/human-GEM/Human-GEM_1_12/Human-GEM/model/Human-GEM.mat')
 [~,deletedDeadEndRxns] = simplifyModel(ihuman,true,false,true,true,true);
 cModel = removeReactions(ihuman,deletedDeadEndRxns,true,true);
 

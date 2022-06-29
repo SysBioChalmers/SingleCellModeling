@@ -20,8 +20,8 @@ sampleNames = {'N_Alveolar Mac'; ...
                'T_tS2'};
 
 
-inFilename = ['LC3Data5/Bootstrap_' sampleNames{chunk} '.txt'];
-outFilename = ['LC3Data5/Bootstrap_' sampleNames{chunk} '_models.mat'];
+inFilename = ['LC3/Run5/Bootstrap_' sampleNames{chunk} '.txt'];
+outFilename = ['LC3/Run5/Bootstrap_' sampleNames{chunk} '_models.mat'];
 
 % add paths
 addpath(genpath('../../components/RAVEN'));
@@ -44,14 +44,6 @@ load('prepDataHumanGEM.mat');
 
 model_indx = 1:nModels; 
 
-paramsNewAlg = struct();
-paramsNewAlg.TimeLimit = 120;
-paramsNewAlg.MIPGap = 0.0004;
-
-milpSkipMets.simpleMets.mets = {'H2O';'Pi';'PPi';'H+';'O2';'CO2';'Na+'};
-milpSkipMets.simpleMets.compsToKeep = {'i'};
-
-
 arrayData = struct(); 
 arrayData.genes = genes;
 arrayData.levels = dataMat;
@@ -68,7 +60,7 @@ for i = 1:nModels
     % try again with a longer time limit (and then again).
      disp(['running model: ' num2str(i)])
      tic %we run this without step 3
-     mres = getINITModel9(prepDataHumanGEM,arrayData.tissues{i},[],[],arrayData,[],[1;1;1;1;1;1;1;0],[1;1;1;1;1;1;1;0],true,true,milpSkipMets,true,false,paramsNewAlg);
+     mres = ftINIT(prepDataHumanGEM,arrayData.tissues{i},[],[],arrayData,{},getHumanGEMINITSteps('1+0'),false,true,[]);
      toc
      mres.id = arrayData.tissues{i};
      models{i,1} = mres;

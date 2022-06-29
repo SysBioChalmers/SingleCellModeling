@@ -41,6 +41,9 @@ if x.NumWorkers < 8
     error('Insufficient CPUs available (%u) for parallel processing!', x.NumWorkers); %for some reason, Vera often gives 8 cores, which is enough.
 end
 
+%for debugging:
+%models_file = '../data/init_models_depmap15.mat';
+
 % load models and metabolic tasks
 if isnumeric(models_file)
     models_file = strcat('init_models-', num2str(models_file), '.mat');
@@ -50,12 +53,11 @@ fns = fieldnames(x);
 models = getfield(x,fns{1});
 
 % specify paths for cluster use
-addpath('/apps/Common/Core/Gurobi/8.0.0/matlab');
 addpath(genpath('../../components/RAVEN'));
 addpath(genpath('../../components/COBRA'));
 addpath(genpath('../../components/Human-GEM'));
 
-setRavenSolver('gurobi');
+%setRavenSolver('gurobi');
 
 taskStruct = parseTaskList('metabolicTasks_Essential.txt');
 
@@ -74,21 +76,18 @@ for i = 1:length(models)
     models{i}.genes = genes;
     models{i}.rxnGeneMat = rxnGeneMat;
     %also add boundary mets
-    models{i} = addBoundaryMets(models{i});
+    models{i} = closeModel(models{i});
 end
 
 % iterate through models in parallel for-loop
-parpool(8);  % assume 8 CPUs
+%parpool(8);  % assume 8 CPUs
 parfor i = 1:length(models)
-    
-    m = models{i};
-    
     % determine essential genes for each task
-    [~,essentialGenes] = checkTasksGenes(m,[],false,false,true,taskStruct);
+    [~,essentialGenes] = checkTasksGenes(models{i},[],false,false,true,taskStruct);
     
     % collect results
-    tissues{i,1} = m.id;
-    geneList{i,1} = m.genes;
+    tissues{i,1} = models{i}.id;
+    geneList{i,1} = models{i}.genes;
     allEssentials{i,1} = essentialGenes;
     
 end

@@ -28,8 +28,8 @@ sampleNames = {'L2_3 IT';...
     'Vip Chat'};
 
 sampleName = sampleNames{chunk};
-infile = ['MCOR3Data5/Bootstrap_' sampleName '_models.mat'];
-outfile = ['MCOR3Data5/Bootstrap_' sampleName '_taskResults.mat'];
+infile = ['MCOR3/Run5/Bootstrap_' sampleName '_models.mat'];
+outfile = ['MCOR3/Run5/Bootstrap_' sampleName '_taskResults.mat'];
 
 
 x = load(infile);
@@ -41,9 +41,8 @@ allTasks = parseTaskList('metabolicTasks_Full.txt');
 
 %parpool(8);
 parfor i = 1:length(models)
-    modelTmp = addBoundaryMets(models{i});
     disp(['Running: ' num2str(i)])
-    [taskReports{i}, ~]=checkTasks(modelTmp,[],true,false,false,allTasks);
+    [taskReports{i}, ~]=checkTasks(closeModel(models{i}),[],true,false,false,allTasks);
 end
 
 save(outfile, 'taskReports')

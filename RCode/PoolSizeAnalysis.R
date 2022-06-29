@@ -357,7 +357,7 @@ pF = ggplot(df, aes(x = x, y = y, color=tissue, shape=tissue)) +
 pF
 
 ggsave(
-  paste0(fig____path, "Fig2D.png"),
+  paste0(fig____path, "Fig2D-TPM.png"),
   plot = pF,
   width = 8, height = 9, dpi = 300)
 

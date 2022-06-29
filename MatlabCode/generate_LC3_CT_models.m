@@ -20,14 +20,7 @@ nModels = size(dataMat,2);
 load('../data/prepDataHumanGEM.mat');
 %prepDataHumanGEM
 
-model_indx = 1:nModels; %length(s.sampleIds); %run with 15 samples for now
-
-paramsNewAlg = struct();
-paramsNewAlg.TimeLimit = 120;
-paramsNewAlg.MIPGap = 0.0004;
-
-milpSkipMets.simpleMets.mets = {'H2O';'Pi';'PPi';'H+';'O2';'CO2';'Na+'};
-milpSkipMets.simpleMets.compsToKeep = {'i'};
+model_indx = 1:nModels; 
 
 arrayData = struct(); 
 arrayData.genes = genes;
@@ -44,7 +37,7 @@ for i = 1:nModels
      if (isempty(models{i}))
          disp(['running model: ' num2str(i)])
          tic %we run this without step 3
-         mres = getINITModel9(prepDataHumanGEM,arrayData.tissues{i},[],[],arrayData,[],[1;1;1;1;1;1;1;0],[1;1;1;1;1;1;1;0],true,true,milpSkipMets,true,false,paramsNewAlg);
+         mres = ftINIT(prepDataHumanGEM,arrayData.tissues{i},[],[],arrayData,{},getHumanGEMINITSteps('1+0'),false,true,[]);
          toc
          mres.id = arrayData.tissues{i};
          models{i,1} = mres;

@@ -38,7 +38,7 @@ params.MIPGap = 0.0030;
 
 old_tinit_exec_times = nan(n_models, 1);
 
-for i = start_ind:n_models
+for i = 1:n_models
     disp(['Running old tINIT model: ' num2str(i)])
     try
         tic
@@ -54,6 +54,7 @@ save('../data/old_tinit_exec_times.mat', 'old_tinit_exec_times');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Now with the new algorithm
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
+cd 'C:/Work/MatlabCode/projects/SingleCellModeling/SingleCellModeling/MatlabCode'
 
 %Note - I removed the first two lines in the file to simplify reading of the file
 gtexPath = '../data/GTEx_Analysis_2017-06-05_v8_RNASeQCv1.1.9_gene_median_tpm_mod.gct';
@@ -69,17 +70,10 @@ y = strlength('ENSG00000243485');
 s.genes = cellfun(@(x) x(1:y), s.genes,'UniformOutput',false);
 
 
-
-
-%% run tINIT
-
-% load inputs generated using "prepare_tINIT_inputs" function
 load('../data/prepDataHumanGEMEns.mat');
 prepDataHumanGEMEns
 
 model_indx = 1:10;
-
-model_indx = 1:length(s.sampleIds);
 
 arrayDataNewAlg = struct();
 arrayDataNewAlg.genes = s.genes;
@@ -87,30 +81,25 @@ arrayDataNewAlg.tissues = s.sampleIds(model_indx);
 arrayDataNewAlg.levels = s.data(:,model_indx);
 arrayDataNewAlg.threshold = 1;
 
-n_models = numel(arrayData.tissues);
+n_models = numel(model_indx);
 
-paramsNewAlg = struct();
-paramsNewAlg.TimeLimit = 120;
-paramsNewAlg.MIPGap = 0.0004;
+%paramsNewAlg = struct();
+%paramsNewAlg.TimeLimit = 120;
+%paramsNewAlg.MIPGap = 0.0004;
 
-milpSkipMets.simpleMets.mets = {'H2O';'Pi';'PPi';'H+';'O2';'CO2';'Na+'};
-milpSkipMets.simpleMets.compsToKeep = {'i'};
+%milpSkipMets.simpleMets.mets = {'H2O';'Pi';'PPi';'H+';'O2';'CO2';'Na+'};
+%milpSkipMets.simpleMets.compsToKeep = {'i'};
 
-%messy with paths right now
-cd 'C:/Work/MatlabCode/projects/HMASandbox/HMA_Sandbox/Single-cell Modeling/tINIT/'
-
-gtex_models_newalg_tmp = cell(length(s.sampleIds),1);
+gtex_models_newalg_tmp = cell(n_models,1);
 
 new_tinit_exec_times = nan(n_models, 1);
 
-%we run it without step 3
+%we run it without the second step, i.e., all transport rxns etc. without GPR are just added.
 for i = 1:n_models
-    tic
     disp(['running model: ' num2str(i)])
     tic 
-    mres = getINITModel9(prepDataHumanGEMEns,arrayData.tissues{i},[],[],arrayData,[],[1;1;1;1;1;1;1;0],[1;1;1;1;1;1;1;0],true,true,milpSkipMets,true,false,paramsNewAlg);
-    toc
-    mres.id = arrayData.tissues{i};
+    mres = ftINIT(prepDataHumanGEMEns,arrayDataNewAlg.tissues{i},[],[],arrayDataNewAlg,{},getHumanGEMINITSteps('1+0'),false,true,[]);
+    mres.id = arrayDataNewAlg.tissues{i};
     gtex_models_newalg_tmp{i,1} = mres;
     new_tinit_exec_times(i) = toc();
 end
