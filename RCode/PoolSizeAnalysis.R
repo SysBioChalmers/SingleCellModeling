@@ -151,7 +151,7 @@ ggsave(
   width = 4, height = 4.03, dpi = 300)
 
 ggsave(
-  paste0(fig____path, "Fig2A.svg"),
+  paste0(fig____path, "Fig2A.eps"),
   plot = pA,
   width = 4, height = 4.03, dpi = 300)
 
@@ -161,7 +161,17 @@ ggsave(
   width = 4, height = 4.5, dpi = 300)
 
 ggsave(
+  paste0(fig____path, "Fig2B.eps"),
+  plot = pB,
+  width = 4, height = 4.5, dpi = 300)
+
+ggsave(
   paste0(fig____path, "Fig2C.png"),
+  plot = pC,
+  width = 4, height = 4.26, dpi = 300)
+
+ggsave(
+  paste0(fig____path, "Fig2C.eps"),
   plot = pC,
   width = 4, height = 4.26, dpi = 300)
 
@@ -197,6 +207,11 @@ pX
 
 ggsave(
   paste0(fig____path, "Fig2SupSampleVar.png"),
+  plot = pX,
+  width = 4.5, height = 4.5, dpi = 300)
+
+ggsave(
+  paste0(fig____path, "Fig2SupSampleVar.svg"),
   plot = pX,
   width = 4.5, height = 4.5, dpi = 300)
 
@@ -240,6 +255,11 @@ pI
 
 ggsave(
   paste0(fig____path, "Fig2E.png"),
+  plot = pI,
+  width = 4, height = 4, dpi = 300)
+
+ggsave(
+  paste0(fig____path, "Fig2E.eps"),
   plot = pI,
   width = 4, height = 4, dpi = 300)
 
@@ -290,8 +310,34 @@ ggsave(
   plot = pJ,
   width = 4.4, height = 5, dpi = 300)
 
+ggsave(
+  paste0(fig____path, "Fig2F.eps"),
+  plot = pJ,
+  width = 4.4, height = 5, dpi = 300)
+
+#Make a statistical test to check if TMM is better than TPM in bulk
+#We do this by using tissue as the "n" here, since the pairwise sample comparison within each group
+#are not independent.
+#Use Wilcoxon signed rank test to check if there is a difference between TMM and TPM:
+#UMICF is a better covariate than GC content
+wilcTMMvsTPMWithinTissueBulk = wilcox.test(x = withinGTExTMM, y = withinGTExTPM,
+                                           alternative = "greater", paired = TRUE)#p-value = 0.1249
+
+wilcox.test(x = c(withinGTExTMM,withinGTExTMM), y = c(withinGTExTPM,withinGTExTPM),
+            alternative = "greater", paired = TRUE)#p-value = 0.1249
 
 
+
+#Make a statistical test for FIg. 2C, if 10% and 20% are significant. Look at last point only.
+stat2CData = readMat("data/PSContStatTestData.mat")
+noContVals = stat2CData$fullVals[[1]][[1]][8,]
+cont10Vals = stat2CData$fullVals[[4]][[1]][8,]
+cont20Vals = stat2CData$fullVals[[5]][[1]][8,]
+mean(noContVals)#0.9461639
+mean(cont10Vals)#0.9231821
+mean(cont20Vals)#0.9121791 #these look reasonable, same as the plot
+wilcox.test(x = noContVals, y = cont10Vals, alternative = "greater", paired = FALSE)#p-value = 1.226e-08
+wilcox.test(x = noContVals, y = cont20Vals, alternative = "greater", paired = FALSE)#p-value = 1.318e-15
 
 
 
@@ -346,7 +392,7 @@ pF = ggplot(df, aes(x = x, y = y, color=tissue, shape=tissue)) +
   scale_shape_manual(values = c(19,19,19,19,19,0,0,2,3), labels=labels) +
   #scale_size_manual(values = rep(20,7), labels = labels) +
   #ylim(1,1.0015) +
-  ggplot2::labs(y=expression("t-SNE y"), x="t-SNE x", title="Structural comparison") +
+  ggplot2::labs(y=expression("t-SNE y"), x="t-SNE x", title="") +
   ggplot2::theme_bw() + #+ ggplot2::theme(legend.position=legendPos, legend.title = element_blank())
   ggplot2::theme(panel.background = element_rect("white", "white", 0, 0, "white"), panel.grid.major= element_blank(),panel.grid.minor= element_blank()) +
   ggplot2::theme(legend.title = element_blank()) +
@@ -357,14 +403,14 @@ pF = ggplot(df, aes(x = x, y = y, color=tissue, shape=tissue)) +
 pF
 
 ggsave(
-  paste0(fig____path, "Fig2D-TPM.png"),
+  paste0(fig____path, "Fig2 Sup TPM.png"),
   plot = pF,
   width = 8, height = 9, dpi = 300)
 
-#ggsave(
-#  paste0(fig____path, "Fig2D.svg"),
-#  plot = pF,
-#  width = 8, height = 9, dpi = 300)
+ggsave(
+  paste0(fig____path, "Fig2 Sup TPM.svg"),
+  plot = pF,
+  width = 8, height = 9, dpi = 300)
 
 
 ##############################
@@ -415,7 +461,7 @@ pG = ggplot(df, aes(x = x, y = y, color=tissue, shape=tissue)) +
   scale_shape_manual(values = c(19,19,19,19,19,0,0,2,3), labels=labels) +
   #scale_size_manual(values = rep(20,7), labels = labels) +
   #ylim(1,1.0015) +
-  ggplot2::labs(y=expression("t-SNE y"), x="t-SNE x", title="") +
+  ggplot2::labs(y=expression("t-SNE y"), x="t-SNE x", title="Structural comparison") +
   ggplot2::theme_bw() + #+ ggplot2::theme(legend.position=legendPos, legend.title = element_blank())
   ggplot2::theme(panel.background = element_rect("white", "white", 0, 0, "white"), panel.grid.major= element_blank(),panel.grid.minor= element_blank()) +
   ggplot2::theme(legend.title = element_blank()) +
@@ -426,7 +472,12 @@ pG = ggplot(df, aes(x = x, y = y, color=tissue, shape=tissue)) +
 pG
 
 ggsave(
-  paste0(fig____path, "Fig2 Sup TMM.png"),
+  paste0(fig____path, "Fig2D TMM.png"),
+  plot = pG,
+  width = 8, height = 9, dpi = 300)
+
+ggsave(
+  paste0(fig____path, "Fig2D TMM.eps"), #svg doesn't work in affinity designer for some reason
   plot = pG,
   width = 8, height = 9, dpi = 300)
 
@@ -490,6 +541,11 @@ pH
 
 ggsave(
   paste0(fig____path, "Fig2 Sup Quantile.png"),
+  plot = pH,
+  width = 8, height = 9, dpi = 300)
+
+ggsave(
+  paste0(fig____path, "Fig2 Sup Quantile.svg"),
   plot = pH,
   width = 8, height = 9, dpi = 300)
 

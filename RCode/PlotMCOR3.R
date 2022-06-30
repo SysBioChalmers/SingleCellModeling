@@ -73,6 +73,11 @@ ggsave(
   plot = pC,
   width = 6, height = 5, dpi = 300)
 
+ggsave(
+  paste0(figPath, "Fig3C.eps"),
+  plot = pC,
+  width = 6, height = 5, dpi = 300)
+
 
 #################################################################
 # Supplementary to show that there is no clear grouping on layer
@@ -118,6 +123,11 @@ figSup1 = ggarrange(pSup1A,pSup1B, nrow=1, ncol=2, labels=c("A","B"), font.label
 
 ggsave(
   paste0(figPath, "FigSup3_1.png"),
+  plot = figSup1,
+  width = 12, height = 5, dpi = 300)
+
+ggsave(
+  paste0(figPath, "FigSup3_1.eps"),
   plot = figSup1,
   width = 12, height = 5, dpi = 300)
 
@@ -185,6 +195,11 @@ p3D
 
 ggsave(
   paste0(figPath, "Fig3D.png"),
+  plot = p3D,
+  width = 7, height = 5, dpi = 300)
+
+ggsave(
+  paste0(figPath, "Fig3D.svg"),
   plot = p3D,
   width = 7, height = 5, dpi = 300)
 

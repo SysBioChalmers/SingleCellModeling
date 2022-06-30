@@ -159,6 +159,9 @@ s.writeToTextFile('../data/PoolSize/pseudoBulkModelDataCPM.txt');
 load('C:/Work/MatlabCode/components/human-GEM/Human-GEM_1_12/Human-GEM/model/Human-GEM.mat')
 [~,deletedDeadEndRxns] = simplifyModel(ihuman,true,false,true,true,true);
 cModel = removeReactions(ihuman,deletedDeadEndRxns,true,true);
+%convert genes
+[cModel.grRules, cModel.genes, cModel.rxnGeneMat] = translateGrRules(cModel.grRules, 'Name');
+
 
 %for the contaminated samples only
 rng(1);  
@@ -185,8 +188,9 @@ X = zeros(numContPoints,numel(rxnScoresCont));
 Y = zeros(numContPoints,numel(rxnScoresCont));
 
 progbar = ProgrBar('Generating data for pool size vs reaction scores Jaccard, contaminated');
+fullVals = cell(numel(rxnScoresCont),1);
 for i = 1:numel(rxnScoresCont)
-   vals = calcJaccard(rxnScoresCont{i}, progbar.GetSubContext(1/numel(rxnScoresCont)));
+   [vals, fullVals{i}] = calcJaccard(rxnScoresCont{i}, progbar.GetSubContext(1/numel(rxnScoresCont)));
    X(:,i) = poolSizesCont.';
    Y(:,i) = vals.';
 end
@@ -196,4 +200,8 @@ resPoolSizeVsReactionScoresJaccardCont.Y = Y;
 save('../data/PSresPoolSizeVsReactionScoresJaccardCont.mat', 'resPoolSizeVsReactionScoresJaccardCont');
 
 progbar.Done();
+
+%save data for statistical test
+save('../data/PSContStatTestData.mat', 'fullVals');
+
 

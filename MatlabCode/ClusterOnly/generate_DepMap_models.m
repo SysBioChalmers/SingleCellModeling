@@ -70,20 +70,11 @@ end
 
 for i = start_ind:n_models
     
-    % First try to run tINIT with shorter time limit. If it fails, then
-    % try again with a longer time limit (and then again).
-    try
-        params.TimeLimit = 1000;
-        init_model = getINITModel2(model,arrayData.tissues{i},[],[],arrayData,[],true,[],true,true,taskStruct,params);
-    catch
-        try
-            params.TimeLimit = 5000;
-            init_model = getINITModel2(model,arrayData.tissues{i},[],[],arrayData,[],true,[],true,true,taskStruct,params);
-        catch
-            params.TimeLimit = 10000;
-            init_model = getINITModel2(model,arrayData.tissues{i},[],[],arrayData,[],true,[],true,true,taskStruct,params);
-        end
-    end
+    % Run with a really long time limit to ensure a somewhat high quality model.
+	params.TimeLimit = 10000;
+	params.MIPGap = 0.0004;
+	init_model = getINITModel2(model,arrayData.tissues{i},[],[],arrayData,[],true,[],true,true,taskStruct,params);
+
     
     init_model.id = arrayData.tissues{i};
     init_models_depmap{i,1} = init_model;

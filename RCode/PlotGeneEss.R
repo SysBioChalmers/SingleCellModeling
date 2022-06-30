@@ -36,7 +36,8 @@ setwd("C:/Work/MatlabCode/projects/SingleCellModeling/SingleCellModeling")
                                      color='black', size=14),
           axis.text.y = element_text(color='black', size=14),
           axis.line.x = element_blank()) +
-    ylim(c(0.1,0.38)) # +
+    ylim(c(0.1,0.38)) # + #manipulate these numbers to include all data
+    #ylim(c(0,0.5)) # +
   p1B
   
 
@@ -46,7 +47,7 @@ setwd("C:/Work/MatlabCode/projects/SingleCellModeling/SingleCellModeling")
     width = 2.5, height = 3, dpi = 300)
   
   ggsave(
-    paste0(figPath, "FigGeneEss.svg"),
+    paste0(figPath, "FigGeneEss.eps"),
     plot = p1B,
     width = 2.5, height = 3, dpi = 300)
   
@@ -57,7 +58,7 @@ setwd("C:/Work/MatlabCode/projects/SingleCellModeling/SingleCellModeling")
   
   library(R.matlab)
   
-  tINITTimes = as.numeric(readMat("data/old_tinit_exec_times.mat")$old.tinit.exec.times2) #remove the 2 if you get an error here
+  tINITTimes = as.numeric(readMat("data/old_tinit_exec_times.mat")$old.tinit.exec.times)
   tINIT2Times = as.numeric(readMat("data/new_tinit_exec_times.mat")$new.tinit.exec.times)
   
   names = c("tINIT","ftINIT")
@@ -77,6 +78,8 @@ setwd("C:/Work/MatlabCode/projects/SingleCellModeling/SingleCellModeling")
   p1C = ggplot(df, aes(x = method, y = times, fill = method)) +
     geom_boxplot() +
     scale_fill_manual(values=color_palette) +
+    #scale_y_continuous(trans = 'log10', breaks = c(seq(10,90,by=10),seq(100,900,by=100),seq(1000,3000,by=1000)), labels = c("10",rep("",8),"100", rep("",8), "1000", rep("",2)), limits = c(10,3500)) +
+    scale_y_continuous(trans = 'log10', limits = c(10,3500)) +
     theme_classic() + 
     ylab('Execution time (s)') +
     xlab('') +
@@ -86,7 +89,7 @@ setwd("C:/Work/MatlabCode/projects/SingleCellModeling/SingleCellModeling")
           axis.text.y = element_text(color='black', size=14),
           axis.line.x = element_blank(), legend.title = element_blank(), legend.position = "none") +
     geom_hline(yintercept=0, color='black')
-  p1C
+  p1C #the warning here is ok, it is there because not all combinations of x and y exist
   
   
   ggsave(
@@ -95,7 +98,7 @@ setwd("C:/Work/MatlabCode/projects/SingleCellModeling/SingleCellModeling")
     width = 2.5, height = 3, dpi = 300)
   
   ggsave(
-    paste0(figPath, "FigExecTimes.svg"),
+    paste0(figPath, "FigExecTimes.eps"),
     plot = p1C,
     width = 2.5, height = 3, dpi = 300)
   
