@@ -64,6 +64,53 @@ all(tissTest == tiss) #ok
 write_tsv(subMatrix, 'data/gtexIndSamp.txt')
 write_tsv(tibble(tiss), 'data/gtexIndSampTissues.txt', col_names = FALSE)
 
+##################################################################
+#For the normalization tests etc, use 8 samples per tissue instead, so repeat with 8
+##################################################################
+
+
+sampPerTissue
+desiredSampPerTissue = 8
+
+tissuesFilt = tissues[sampPerTissue >= desiredSampPerTissue]
+#select the 8 first of each type
+ids = rep(NA, desiredSampPerTissue*length(tissuesFilt))
+for (i in 1:length(tissuesFilt)) {
+  sel = metaDatFilt$SMTSD == tissuesFilt[i]
+  #  print(sum(sel))
+  ids[(1:desiredSampPerTissue) + (i-1)*desiredSampPerTissue] = metaDatFilt$SAMPID[which(sel)[1:desiredSampPerTissue]];
+}
+
+library(qdapTools)
+lookupTable = tibble(x = colnames(RNASeq), y = 1:length(colnames(RNASeq)))
+indices = lookup(ids, lookupTable)
+
+
+subMatrix = RNASeq[,c(1,2,indices)]
+dim(subMatrix)#looks good
+#add one column with tissue
+
+tiss = rep(tissuesFilt, 1, each=desiredSampPerTissue)
+
+#remove version from gene
+genes = substring(subMatrix[[1]], 1, str_length("ENSG00000186056"))
+subMatrix[[1]] = genes
+
+#test
+idTest = colnames(subMatrix)[c(-1,-2)]
+#make a loop to make it super simple and reliable
+tissTest = rep("", length(idTest))
+for (i in 1:length(idTest)) {
+  tissTest[i] = metaDat$SMTSD[metaDat$SAMPID == idTest[i]]
+}
+all(tissTest == tiss) #ok
+
+write_tsv(subMatrix, 'data/gtexIndSamp8.txt')
+write_tsv(tibble(tiss), 'data/gtexIndSampTissues8.txt', col_names = FALSE)
+
+
+
+
 #Now apply different normalization strategies than TPM, and do it on all data together
 
 #first TMM
@@ -152,14 +199,14 @@ cs#pretty diverse scaling, interesting
 
 #assemble tissues
 tissAll = c(tiss, "L4 Lung", "L4 Spleen", rep("LC3",dim(LC3Data)[2]-1))
-length(tissAll)#283
-dim(tmmData)#284, ok, gene as well
+length(tissAll)#442
+dim(tmmData)#443, ok, gene as well
 #now save
 
 write_tsv(tmmData, 'data/gtexIndSampTMM.txt')
 write_tsv(tibble(tissAll), 'data/gtexIndSampTissuesTMM.txt', col_names = FALSE)
 
-#also test to do quantile normalization
+#also do quantile normalization
 quantileData = merged4
 #TPM first
 cs = colSums(quantileData[,-1])

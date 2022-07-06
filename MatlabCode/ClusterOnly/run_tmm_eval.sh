@@ -8,7 +8,7 @@
 
 # instead of using the "SBATCH -o run_init-X.log" line here,
 # include the flag "-o run_init-%A_%a.log" in the sbatch submission command:
-# sbatch -o run_tmm_eval-%A-%a.log --array=1-10 run_tmm_eval.sh
+# sbatch -o logs/run_tmm_eval-%A-%a.log --array=1-10 run_tmm_eval.sh
 
 
 module load MATLAB/2019a

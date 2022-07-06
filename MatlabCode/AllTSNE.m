@@ -9,7 +9,7 @@ gtexIndModels = {};
 
 for i = 1:10
     disp(num2str(i))
-    fn = ['../data/GTExInd/chunk_' num2str(i) '.mat'];
+    fn = ['../data/GTExInd8/chunk_' num2str(i) '.mat'];
     x = load(fn);
     gtexIndModels = [gtexIndModels;x.models];
 end
@@ -38,7 +38,7 @@ rng(1);%random seed
 proj_coords = tsne(double(compMat.'),'Distance','hamming','NumDimensions',2,'Exaggeration',6,'Perplexity',10);
 
 %read the gtex tissue data
-T = readtable('../data/GTExInd/gtexIndSampTissues.txt', 'ReadVariableNames',false);
+T = readtable('../data/GTExInd8/gtexIndSampTissues8.txt', 'ReadVariableNames',false);
 gtexTissues = table2cell(T(:,1));
 
 %export to R
@@ -72,15 +72,18 @@ compMat2 = compMat(filt,:);
 %size(compMat2)%looks ok, 7327         283
 
 %calc the average jaccard wihtin groups of gtex
-numTiss = 265/5;
+%numTiss = 265/5;
+
+numTiss = 53;
 jaccWithinGtexGroups = nan(numTiss,1);
+sampPerTiss = 8;
 for i = 1:numTiss
-    startInd = (i-1)*5 + 1;
-    endInd = i*5;
-    jaccs = nan(4*5/2,1);
+    startInd = (i-1)*sampPerTiss + 1;
+    endInd = i*sampPerTiss;
+    jaccs = nan(sampPerTiss*(sampPerTiss-1)/2,1);
     currJac = 1;
-    for j = 0:3
-       for k = (j+1):4
+    for j = 0:(sampPerTiss-2)
+       for k = (j+1):(sampPerTiss-1)
            jaccs(currJac) = jaccard(compMat2(:,startInd + j), compMat2(:,startInd + k));
            currJac = currJac + 1;
        end
@@ -88,11 +91,11 @@ for i = 1:numTiss
     jaccWithinGtexGroups(i) = mean(jaccs);
 end
 
-jaccAcrossGtexGroups = nan(265*264/2,1);
+jaccAcrossGtexGroups = nan((numTiss*sampPerTiss) *(numTiss*sampPerTiss-1)/2,1);
 currJac = 1;
-for i = 1:264
-    jaccs = nan(4*5/2,1);
-    for j = (i+1):265
+for i = 1:(numTiss*sampPerTiss-1)
+    jaccs = nan((sampPerTiss-1)*sampPerTiss/2,1);
+    for j = (i+1):(numTiss*sampPerTiss)
        jaccAcrossGtexGroups(currJac) = jaccard(compMat2(:,i), compMat2(:,j));
        currJac = currJac + 1;
     end
@@ -100,8 +103,6 @@ end
 
 acrossTPM = jaccAcrossGtexGroups;
 withinTPM = jaccWithinGtexGroups;
-acrossMeanTPM = mean(jaccAcrossGtexGroups);
-withinMeanTPM = mean(jaccWithinGtexGroups);
 
 %also within/across lung
 
@@ -112,7 +113,7 @@ lungImmune = [1;3;5;6;7;8;9;10;11;12;13;14;16];
 
 jaccWithinScs = nan(12*13/2,1);
 currJac = 1;
-indices = lungImmune + 267;
+indices = lungImmune + numTiss*sampPerTiss + 2;%2 for L4
 for i = 1:(length(indices)-1)
     for j = (i+1):length(indices)
        jaccWithinScs(currJac) = jaccard(compMat2(:,indices(i)), compMat2(:,indices(j)));
@@ -122,10 +123,10 @@ end
 jaccWithinScTPM = mean(jaccWithinScs);
 
 %compare sc and gtex
-bloodInd = find(strcmp(gtexTissues, 'Whole Blood'));%1-5
-jaccAcrossLungs = nan(5*length(indices),1);
+bloodInd = find(strcmp(gtexTissues, 'Whole Blood'));%1-8
+jaccAcrossLungs = nan(sampPerTiss*length(indices),1);
 currJac = 1;
-for i = bloodInd(1):bloodInd(5)
+for i = bloodInd(1):bloodInd(sampPerTiss)
     for j = 1:length(indices)
        jaccAcrossLungs(currJac) = jaccard(compMat2(:,i), compMat2(:,indices(j)));
        currJac = currJac + 1;
@@ -134,9 +135,9 @@ end
 jaccAcrossLungTPM = mean(jaccAcrossLungs);
 
 %compare sc and any gtex
-jaccAcrossLungAnys = nan(265*length(indices),1);
+jaccAcrossLungAnys = nan(numTiss*sampPerTiss*length(indices),1);
 currJac = 1;
-for i = 1:265
+for i = 1:(numTiss*sampPerTiss)
     for j = 1:length(indices)
        jaccAcrossLungAnys(currJac) = jaccard(compMat2(:,i), compMat2(:,indices(j)));
        currJac = currJac + 1;
@@ -211,19 +212,20 @@ filt = ismember(baseModel.rxns, baseRxns);
 
 
 compMat2 = compMat(filt,:);
-%size(compMat2)%looks ok 7327         283
+%size(compMat2)%looks ok 7340         442
 
 
 %calc the average jaccard wihtin groups of gtex
-numTiss = 265/5;
+numTiss = 53;
 jaccWithinGtexGroups = nan(numTiss,1);
+sampPerTiss = 8;
 for i = 1:numTiss
-    startInd = (i-1)*5 + 1;
-    endInd = i*5;
-    jaccs = nan(4*5/2,1);
+    startInd = (i-1)*sampPerTiss + 1;
+    endInd = i*sampPerTiss;
+    jaccs = nan(sampPerTiss*(sampPerTiss-1)/2,1);
     currJac = 1;
-    for j = 0:3
-       for k = (j+1):4
+    for j = 0:(sampPerTiss-2)
+       for k = (j+1):(sampPerTiss-1)
            jaccs(currJac) = jaccard(compMat2(:,startInd + j), compMat2(:,startInd + k));
            currJac = currJac + 1;
        end
@@ -231,11 +233,11 @@ for i = 1:numTiss
     jaccWithinGtexGroups(i) = mean(jaccs);
 end
 
-jaccAcrossGtexGroups = nan(265*264/2,1);
+jaccAcrossGtexGroups = nan((numTiss*sampPerTiss) *(numTiss*sampPerTiss-1)/2,1);
 currJac = 1;
-for i = 1:264
-    jaccs = nan(4*5/2,1);
-    for j = (i+1):265
+for i = 1:(numTiss*sampPerTiss-1)
+    jaccs = nan((sampPerTiss-1)*sampPerTiss/2,1);
+    for j = (i+1):(numTiss*sampPerTiss)
        jaccAcrossGtexGroups(currJac) = jaccard(compMat2(:,i), compMat2(:,j));
        currJac = currJac + 1;
     end
@@ -243,10 +245,9 @@ end
 
 acrossTMM = jaccAcrossGtexGroups;
 withinTMM = jaccWithinGtexGroups;
-acrossMeanTMM = mean(jaccAcrossGtexGroups);
-withinMeanTMM = mean(jaccWithinGtexGroups);
 
 %also within/across lung
+
 lungImmune = [1;3;5;6;7;8;9;10;11;12;13;14;16];
 %length(lungImmune)
 %lungEpithelial = c(2,4,15)
@@ -254,38 +255,34 @@ lungImmune = [1;3;5;6;7;8;9;10;11;12;13;14;16];
 
 jaccWithinScs = nan(12*13/2,1);
 currJac = 1;
-indices = lungImmune + 267;
+indices = lungImmune + numTiss*sampPerTiss + 2;%2 for L4
 for i = 1:(length(indices)-1)
     for j = (i+1):length(indices)
        jaccWithinScs(currJac) = jaccard(compMat2(:,indices(i)), compMat2(:,indices(j)));
        currJac = currJac + 1;
     end
 end
-jaccWithinScTPM = mean(jaccWithinScs);
 
 %compare sc and gtex
-bloodInd = find(strcmp(gtexTissues, 'Whole Blood'));%1-5
-%bloodInd = find(strcmp(gtexTissues, 'Lung'));%1-5
-jaccAcrossLungs = nan(5*length(indices),1);
+bloodInd = find(strcmp(gtexTissues, 'Whole Blood'));%1-8
+jaccAcrossLungs = nan(sampPerTiss*length(indices),1);
 currJac = 1;
-for i = bloodInd(1):bloodInd(5)
+for i = bloodInd(1):bloodInd(sampPerTiss)
     for j = 1:length(indices)
        jaccAcrossLungs(currJac) = jaccard(compMat2(:,i), compMat2(:,indices(j)));
        currJac = currJac + 1;
     end
 end
-jaccAcrossLungTPM = mean(jaccAcrossLungs);
 
 %compare sc and any gtex
-jaccAcrossLungAnys = nan(265*length(indices),1);
+jaccAcrossLungAnys = nan(numTiss*sampPerTiss*length(indices),1);
 currJac = 1;
-for i = 1:265
+for i = 1:(numTiss*sampPerTiss)
     for j = 1:length(indices)
        jaccAcrossLungAnys(currJac) = jaccard(compMat2(:,i), compMat2(:,indices(j)));
        currJac = currJac + 1;
     end
 end
-jaccAcrossLungAndAnyTPM = mean(jaccAcrossLungAnys);
 
 d = struct();
 d.acrossGTEx = acrossTMM;
@@ -353,18 +350,20 @@ filt = ismember(baseModel.rxns, baseRxns);
 
 
 compMat2 = compMat(filt,:);
-size(compMat2)%looks ok %7327         283
+%size(compMat2)%looks ok 7340         442
+
 
 %calc the average jaccard wihtin groups of gtex
-numTiss = 265/5;
+numTiss = 53;
 jaccWithinGtexGroups = nan(numTiss,1);
+sampPerTiss = 8;
 for i = 1:numTiss
-    startInd = (i-1)*5 + 1;
-    endInd = i*5;
-    jaccs = nan(4*5/2,1);
+    startInd = (i-1)*sampPerTiss + 1;
+    endInd = i*sampPerTiss;
+    jaccs = nan(sampPerTiss*(sampPerTiss-1)/2,1);
     currJac = 1;
-    for j = 0:3
-       for k = (j+1):4
+    for j = 0:(sampPerTiss-2)
+       for k = (j+1):(sampPerTiss-1)
            jaccs(currJac) = jaccard(compMat2(:,startInd + j), compMat2(:,startInd + k));
            currJac = currJac + 1;
        end
@@ -372,11 +371,11 @@ for i = 1:numTiss
     jaccWithinGtexGroups(i) = mean(jaccs);
 end
 
-jaccAcrossGtexGroups = nan(265*264/2,1);
+jaccAcrossGtexGroups = nan((numTiss*sampPerTiss) *(numTiss*sampPerTiss-1)/2,1);
 currJac = 1;
-for i = 1:264
-    jaccs = nan(4*5/2,1);
-    for j = (i+1):265
+for i = 1:(numTiss*sampPerTiss-1)
+    jaccs = nan((sampPerTiss-1)*sampPerTiss/2,1);
+    for j = (i+1):(numTiss*sampPerTiss)
        jaccAcrossGtexGroups(currJac) = jaccard(compMat2(:,i), compMat2(:,j));
        currJac = currJac + 1;
     end
@@ -384,10 +383,9 @@ end
 
 acrossQ = jaccAcrossGtexGroups;
 withinQ = jaccWithinGtexGroups;
-acrossMeanQ = mean(jaccAcrossGtexGroups);
-withinMeanQ = mean(jaccWithinGtexGroups);
 
 %also within/across lung
+
 lungImmune = [1;3;5;6;7;8;9;10;11;12;13;14;16];
 %length(lungImmune)
 %lungEpithelial = c(2,4,15)
@@ -395,38 +393,34 @@ lungImmune = [1;3;5;6;7;8;9;10;11;12;13;14;16];
 
 jaccWithinScs = nan(12*13/2,1);
 currJac = 1;
-indices = lungImmune + 267;
+indices = lungImmune + numTiss*sampPerTiss + 2;%2 for L4
 for i = 1:(length(indices)-1)
     for j = (i+1):length(indices)
        jaccWithinScs(currJac) = jaccard(compMat2(:,indices(i)), compMat2(:,indices(j)));
        currJac = currJac + 1;
     end
 end
-jaccWithinScTPM = mean(jaccWithinScs);
 
 %compare sc and gtex
-bloodInd = find(strcmp(gtexTissues, 'Whole Blood'));%1-5
-%bloodInd = find(strcmp(gtexTissues, 'Lung'));%1-5
-jaccAcrossLungs = nan(5*length(indices),1);
+bloodInd = find(strcmp(gtexTissues, 'Whole Blood'));%1-8
+jaccAcrossLungs = nan(sampPerTiss*length(indices),1);
 currJac = 1;
-for i = bloodInd(1):bloodInd(5)
+for i = bloodInd(1):bloodInd(sampPerTiss)
     for j = 1:length(indices)
        jaccAcrossLungs(currJac) = jaccard(compMat2(:,i), compMat2(:,indices(j)));
        currJac = currJac + 1;
     end
 end
-jaccAcrossLungTPM = mean(jaccAcrossLungs);
 
 %compare sc and any gtex
-jaccAcrossLungAnys = nan(265*length(indices),1);
+jaccAcrossLungAnys = nan(numTiss*sampPerTiss*length(indices),1);
 currJac = 1;
-for i = 1:265
+for i = 1:(numTiss*sampPerTiss)
     for j = 1:length(indices)
        jaccAcrossLungAnys(currJac) = jaccard(compMat2(:,i), compMat2(:,indices(j)));
        currJac = currJac + 1;
     end
 end
-jaccAcrossLungAndAnyTPM = mean(jaccAcrossLungAnys);
 
 d = struct();
 d.acrossGTEx = acrossQ;
