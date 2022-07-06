@@ -1,3 +1,4 @@
+#This code extracts the data from a huge tsv file and saves it as a sparse matrix
 library(tidyverse)
 memory.limit(size = 100000)
 

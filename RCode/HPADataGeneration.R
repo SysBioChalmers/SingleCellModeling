@@ -1,3 +1,5 @@
+#Generates DSAVE data for the clusters, decides which are large enough, and 
+#saves the DSAVE data, and generates bootstrap data for the selected clusters
 library(tidyverse)
 memory.limit(size = 100000)
 
@@ -9,7 +11,7 @@ sparseMat = readRDS("D:/SingleCellModeling/MetAtlas/SparseMat.RDS")
 metaData = readRDS("D:/SingleCellModeling/MetAtlas/metaData.RDS")
 
 tissClust = metaData[,c(1,3)]
-tissClust2 = unique(metaData[,c(1,3)])
+tissClust2 = unique(tissClust)
 unique(tissClust2$Tissue)#26 tissues
 
 nm = rep(NA,dim(tissClust2)[1]) #444 in total
@@ -29,8 +31,6 @@ tissClust3 = tissClust2[nm>400,]
 dsaveRes = vector(mode = "list", length = dim(tissClust3)[1])
 for (i in 1:(dim(tissClust3)[1])) {
   print(i)
-#  dSub = d[d$Tissue == tissClust3$Tissue[i] & d$Cluster == tissClust3$Cluster[i],]
-#  dSub2 = as(as.data.frame(dSub[,c(-1,-2,-3)]),"Matrix")
   dSub = sparseMat[,metaData$Tissue == tissClust3$Tissue[i] & metaData$Cluster == tissClust3$Cluster[i]]
   res = DSAVEGetTotalVariationPoolSize(dSub, upperBound = 50, lowerBound = 5e-1, poolSizes = c(100,200,500,750,1000,1500,2000,2500,3000,4000,5000))
   dsaveRes[[i]] = res
@@ -39,6 +39,7 @@ for (i in 1:(dim(tissClust3)[1])) {
 dsBulk = DSAVE::bulkTotalVar1vs1[[4]] [[2]]
 
 saveRDS(dsaveRes, "D:/SingleCellModeling/MetAtlas/DSAVEData.RDS")
+saveRDS(tissClust3, "D:/SingleCellModeling/MetAtlas/DSAVETissues.RDS")
 
 
 
