@@ -36,7 +36,7 @@ setwd("C:/Work/MatlabCode/projects/SingleCellModeling/SingleCellModeling")
                                      color='black', size=14),
           axis.text.y = element_text(color='black', size=14),
           axis.line.x = element_blank()) +
-    ylim(c(0.1,0.38)) # + #manipulate these numbers to include all data
+    ylim(c(0.08,0.40)) # + #manipulate these numbers to include all data
     #ylim(c(0,0.5)) # +
   p1B
   
