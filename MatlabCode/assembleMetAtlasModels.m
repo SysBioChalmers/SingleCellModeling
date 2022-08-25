@@ -13,8 +13,12 @@ for i = 1:length(sampleNames)
     inFilename = ['MetAtlas/BootstrapModels/Bootstrap_' sampleNames{i} '_models.mat'];
     x = load(inFilename);
     mat = x.rxnOnData;
-    totMat(:,i) = sum(mat,2);
+    totMat(:,i) = sum(mat,2)/100;
 end
+
+%count number of tissues
+nms = split(sampleNames, '_');
+length(unique(nms(:,:,1))) %19
 
 %Write text file
 %first get the cell type names
@@ -44,7 +48,7 @@ tissues(ia) = T.tissueCT(ib);
 doubles = repmat("double",length(sampleNames),1);
 varTypes = ["string";doubles].';
 
-varNames = ["rxn";string(expNames)].';
+varNames = ["id";string(expNames)].';
 numRxns = length(prepDataHumanGEMEns.refModel.rxns);
 expT = table('Size',[numRxns, length(sampleNames)+1],'VariableTypes',varTypes,'VariableNames',varNames);
 expT(:,1) = prepDataHumanGEMEns.refModel.rxns;
@@ -52,7 +56,7 @@ expT(:,2:(length(sampleNames)+1)) = num2cell(totMat);
 
 %Test that it looks ok:
 %all(all(table2array(expT(1000:1010,100:110)) == totMat(1000:1010,99:109))) %OK
-writetable(expT, 'MetAtlas/MetAtlasTable.txt');
+writetable(expT, 'MetAtlas/HPA_single-cell_reactions.tsv','FileType','text','Delimiter','\t');
 
 %also run t-sne on the reactions included in the first step of ftINIT
 mask = prepDataHumanGEMEns.toIgnoreExch | ...
