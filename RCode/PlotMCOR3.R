@@ -1,5 +1,6 @@
 library(ggplot2)
 library(scales) # for muted function
+library(tidyverse)
 
 figPath = "Z:/projects/Single-cell modeling/figures/"
 
@@ -32,10 +33,6 @@ sel = (rowSums(onOff5 == 0) > 0) & (rowSums(onOff5 == 5) > 0)
 sum(sel) #387, maybe a bit too much to present
 length(sel)
 onOff5[sel,]
-
-#test a tsne plot
-x = as.numeric(S_5$tsneX)
-y = as.numeric(S_5$tsneY)
 
 res = prcomp(t(data5))
 x = res$x[,1]
@@ -118,6 +115,38 @@ pSup1B = ggplot(df, aes(x = x, y = y, color=tissue, shape=tissue)) +
                  axis.text.x = element_text(color='black', size=14),
                  axis.text.y = element_text(color='black', size=14))
 pSup1B
+
+x = res$x[,1]
+y = res$x[,2]
+df = tibble(x=x, y=y, tissue = as.factor(unlist(S_5$sampleIds)))
+
+color_palette = c('#000000','#888888','#FF0000','#00BB00','#DC556B','#6B97EC','#BC976B', '#0000FF')  # light green, light yellow, light blue
+
+labels = unlist(S_5$sampleIds)
+
+ggplotColours <- function(n = 6, h = c(0, 360) + 15){
+  if ((diff(h) %% 360) < 1) h[2] <- h[2] - 360/n
+  hcl(h = (seq(h[1], h[2], length = n)), c = 100, l = 65)
+}
+
+palette2 <- ggplotColours(n=17) #should be the same as in Seurat
+
+
+pSup1C = ggplot(df, aes(x = x, y = y, color=tissue, shape=tissue)) +
+  geom_point(size=2, stroke = 2) +
+  scale_color_manual(values = palette2, labels = labels) + #using the same colors as in Seurat
+  scale_shape_manual(values =               c(1,1,1,1,1,2,2,3,3,3,1,1,1,2,4,4,5), labels=labels) +
+  ggplot2::labs(y=expression("PC 3"), x="PC 1", title="Structural comparison") +
+  ggplot2::theme_bw() + 
+  ggplot2::theme(panel.background = element_rect("white", "white", 0, 0, "white"), panel.grid.major= element_blank(),panel.grid.minor= element_blank()) +
+  ggplot2::theme(legend.title = element_blank()) +
+  ggplot2::theme(legend.title = element_blank(),legend.position="right", legend.text=element_text(size=14)) + #guides(colour = guide_legend(nrow = 4), size = guide_legend(nrow = 4), linetype = guide_legend(nrow = 4)) +
+  ggplot2::theme(text = element_text(size=14),
+                 axis.text.x = element_text(color='black', size=14),
+                 axis.text.y = element_text(color='black', size=14))
+pC
+
+
 
 figSup1 = ggarrange(pSup1A,pSup1B, nrow=1, ncol=2, labels=c("A","B"), font.label = list(size = 24))
 
