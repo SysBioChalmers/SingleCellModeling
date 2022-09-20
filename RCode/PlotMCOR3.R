@@ -1,7 +1,7 @@
 library(ggplot2)
 library(scales) # for muted function
 library(tidyverse)
-
+library(ggpubr)
 figPath = "Z:/projects/Single-cell modeling/figures/"
 
 setwd("C:/Work/MatlabCode/projects/SingleCellModeling/SingleCellModeling")
@@ -88,7 +88,7 @@ pSup1A = ggplot(df, aes(x = x, y = y, color=tissue, shape=tissue)) +
   geom_point(size=2, stroke = 2) +
   scale_color_manual(values = palette2, labels = labels) + #using the same colors as in Seurat
   scale_shape_manual(values = c(1,rep(2,6),rep(3,7),rep(4,3)), labels=labels) +
-  ggplot2::labs(y=expression("PC 2"), x="PC 1", title="") +
+  ggplot2::labs(y=expression("PC 2"), x="PC 1", title="Layer, PC 1-2") +
   ggplot2::theme_bw() + #+ ggplot2::theme(legend.position=legendPos, legend.title = element_blank())
   ggplot2::theme(panel.background = element_rect("white", "white", 0, 0, "white"), panel.grid.major= element_blank(),panel.grid.minor= element_blank()) +
   ggplot2::theme(legend.title = element_blank()) +
@@ -106,7 +106,7 @@ pSup1B = ggplot(df, aes(x = x, y = y, color=tissue, shape=tissue)) +
   geom_point(size=2, stroke = 2) +
   scale_color_manual(values = palette2, labels = labels) + #using the same colors as in Seurat
   scale_shape_manual(values = c(1,rep(2,6),rep(3,7),rep(4,3)), labels=labels) +
-  ggplot2::labs(y=expression("PC 4"), x="PC 3", title="") +
+  ggplot2::labs(y=expression("PC 4"), x="PC 3", title="Layer, PC 3-4") +
   ggplot2::theme_bw() + #+ ggplot2::theme(legend.position=legendPos, legend.title = element_blank())
   ggplot2::theme(panel.background = element_rect("white", "white", 0, 0, "white"), panel.grid.major= element_blank(),panel.grid.minor= element_blank()) +
   ggplot2::theme(legend.title = element_blank()) +
@@ -136,7 +136,7 @@ pSup1C = ggplot(df, aes(x = x, y = y, color=tissue, shape=tissue)) +
   geom_point(size=2, stroke = 2) +
   scale_color_manual(values = palette2, labels = labels) + #using the same colors as in Seurat
   scale_shape_manual(values =               c(1,1,1,1,1,2,2,3,3,3,1,1,1,2,4,4,5), labels=labels) +
-  ggplot2::labs(y=expression("PC 3"), x="PC 1", title="Structural comparison") +
+  ggplot2::labs(y=expression("PC 2"), x="PC 1", title="Neuron type, PC 1-2") +
   ggplot2::theme_bw() + 
   ggplot2::theme(panel.background = element_rect("white", "white", 0, 0, "white"), panel.grid.major= element_blank(),panel.grid.minor= element_blank()) +
   ggplot2::theme(legend.title = element_blank()) +
@@ -144,21 +144,21 @@ pSup1C = ggplot(df, aes(x = x, y = y, color=tissue, shape=tissue)) +
   ggplot2::theme(text = element_text(size=14),
                  axis.text.x = element_text(color='black', size=14),
                  axis.text.y = element_text(color='black', size=14))
-pC
+pSup1C
 
 
 
-figSup1 = ggarrange(pSup1A,pSup1B, nrow=1, ncol=2, labels=c("A","B"), font.label = list(size = 24))
+figSup1 = ggarrange(pSup1A,pSup1B,pSup1C, nrow=2, ncol=2, labels=c("A","B","C"), font.label = list(size = 24))
 
 ggsave(
   paste0(figPath, "FigSup3_1.png"),
   plot = figSup1,
-  width = 12, height = 5, dpi = 300)
+  width = 12, height = 11, dpi = 300)
 
 ggsave(
   paste0(figPath, "FigSup3_1.eps"),
   plot = figSup1,
-  width = 12, height = 5, dpi = 300)
+  width = 12, height = 11, dpi = 300)
 
 ####################################
 # Tasks comparison
