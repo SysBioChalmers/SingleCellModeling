@@ -10,9 +10,11 @@ setwd("C:/Work/MatlabCode/projects/SingleCellModeling/SingleCellModeling")
 
   # load data
   fns = c("data/geneEss_old_tINIT.txt",
-          "data/geneEss_newalg.txt")
+          "data/geneEss_newalg.txt",
+          "data/geneEss_newalg2.txt"
+          )
   
-  names = c("tINIT","ftINIT")
+  names = c("tINIT","ftINIT 1+0", "ftINIT 1+1")
   
   gea_res = NULL
   for (i in 1:length(fns)) {
@@ -20,10 +22,10 @@ setwd("C:/Work/MatlabCode/projects/SingleCellModeling/SingleCellModeling")
     x$model = names[i]
     gea_res = rbind(gea_res, x)
   }
-  gea_res$model = factor(gea_res$model, as.character(names)[1:2])  # to enforce the model order
+  gea_res$model = factor(gea_res$model, as.character(names)[1:3])  # to enforce the model order
 
   
-  color_palette <- c('#B5D39B','#6B97BC')  # light green, light blue
+  color_palette <- c('#B5D39B','#6B97BC','#E7B56C')  # light green, light blue, light yellow
 
   p1B = ggplot(gea_res, aes(x = model, y = MCC, fill = model)) +
     geom_violin(trim=F, show.legend=F, scale='count') +
@@ -59,21 +61,22 @@ setwd("C:/Work/MatlabCode/projects/SingleCellModeling/SingleCellModeling")
   library(R.matlab)
   
   tINITTimes = as.numeric(readMat("data/old_tinit_exec_times.mat")$old.tinit.exec.times)
-  tINIT2Times = as.numeric(readMat("data/new_tinit_exec_times.mat")$new.tinit.exec.times)
+  ftINITTimes = as.numeric(readMat("data/new_tinit_exec_times.mat")$new.tinit.exec.times)
+  ftINITTimes2 = as.numeric(readMat("data/new_tinit_exec_times2.mat")$new.tinit.exec.times)
   
-  names = c("tINIT","ftINIT")
+  names = c("tINIT","ftINIT 1+0","ftINIT 1+1")
   
   # include the next two lines to compare biomass vs. all-task methods
   # fnames <- c(fnames, paste('BMonly_results_', modelnames, '_DepMap_06.txt', sep=''))
   # modelnames <- c(modelnames, modelnames)
   
-  times = c(tINITTimes,tINIT2Times)
-  method = factor(c(rep(0,length(tINITTimes)), rep(1,length(tINIT2Times))),c(0,1), names)
+  times = c(tINITTimes,ftINITTimes,ftINITTimes2)
+  method = factor(c(rep(0,length(tINITTimes)), rep(1,length(ftINITTimes)), rep(2,length(ftINITTimes2))),c(0,1,2), names)
   
   df = tibble(times = times, method=method)
   
 
-  color_palette = c('#B5D39B','#6B97BC')  # light green, light blue
+  color_palette <- c('#B5D39B','#6B97BC','#E7B56C')  # light green, light blue, light yellow
   
   p1C = ggplot(df, aes(x = method, y = times, fill = method)) +
     geom_boxplot() +

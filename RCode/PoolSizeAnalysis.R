@@ -109,16 +109,17 @@ pA
 ##################
 # Contaminated samples
 
-poolCont = readMat("data/PSresPoolSizeVsReactionScoresJaccardCont.mat")
+#poolCont = readMat("data/PSresPoolSizeVsReactionScoresJaccardCont.mat")
+poolCont = readMat("data/contamination/PSContResults.mat")$s[,,1]
 
-X10x = poolCont$resPoolSizeVsReactionScoresJaccardCont[,,1]$X
-Y10x = poolCont$resPoolSizeVsReactionScoresJaccardCont[,,1]$Y
+X10x = poolCont$poolSizes
+Y10x = poolCont$figData
 
 #transform the data for ggplot
-x = log2(c(as.vector(X10x[,1]), as.vector(X10x[,2]), as.vector(X10x[,3]), as.vector(X10x[,4]), as.vector(X10x[,5])))
-y = c(as.vector(Y10x[,1]), as.vector(Y10x[,2]), as.vector(Y10x[,3]), as.vector(Y10x[,4]), as.vector(Y10x[,5]))
+x = log2(rep(X10x,5))
+y = c(as.vector(Y10x[1,]), as.vector(Y10x[2,]), as.vector(Y10x[3,]), as.vector(Y10x[4,]), as.vector(Y10x[5,]))
 labels = c("0%", "2%", "5%", "10%", "20%")
-group = factor(rep(1:5, 1, each = nrow(X10x)), 1:5, labels)
+group = factor(rep(1:5, 1, each = length(X10x)), 1:5, labels)
 
 
 df = tibble(x=x, y=y, Contamination=group)
@@ -141,6 +142,20 @@ pC = ggplot(cutDf, aes(x = x, y = y, color=Contamination, linetype=Contamination
   ggplot2::theme(text = element_text(size=14), axis.text.x = element_text(color='black', size=14), axis.text.y = element_text(color='black', size=14))
 
 pC
+
+#Make a statistical test for FIg. 2C, if 10% and 20% are significant. Look at last point only.
+stat2CData = readMat("data/PSContStatTestData.mat")
+noContVals = poolCont$fullVals[[1]][[1]][8,]
+cont10Vals = poolCont$fullVals[[4]][[1]][8,]
+cont20Vals = poolCont$fullVals[[5]][[1]][8,]
+mean(noContVals)#0.9695283
+mean(cont10Vals)#0.9656615
+mean(cont20Vals)#0.9604473 #these look reasonable, same as the plot
+wilcox.test(x = noContVals, y = cont10Vals, alternative = "greater", paired = FALSE)#p-value = 0.000196
+wilcox.test(x = noContVals, y = cont20Vals, alternative = "greater", paired = FALSE)#p-value = 3.044e-13
+
+
+
 
 
 #save pA, pB and pC as separate figures - build that figure separately
@@ -328,18 +343,6 @@ wilcox.test(x = c(withinGTExTMM,withinGTExTMM), y = c(withinGTExTPM,withinGTExTP
 
 wilcTMMvsTPMWithinTissueBulk = wilcox.test(x = scVsGTExLungTMM, y = scVsGTExLungTPM,
                                            alternative = "greater", paired = TRUE)#p-value = 0.1249
-
-
-#Make a statistical test for FIg. 2C, if 10% and 20% are significant. Look at last point only.
-stat2CData = readMat("data/PSContStatTestData.mat")
-noContVals = stat2CData$fullVals[[1]][[1]][8,]
-cont10Vals = stat2CData$fullVals[[4]][[1]][8,]
-cont20Vals = stat2CData$fullVals[[5]][[1]][8,]
-mean(noContVals)#0.9461639
-mean(cont10Vals)#0.9231821
-mean(cont20Vals)#0.9121791 #these look reasonable, same as the plot
-wilcox.test(x = noContVals, y = cont10Vals, alternative = "greater", paired = FALSE)#p-value = 1.226e-08
-wilcox.test(x = noContVals, y = cont20Vals, alternative = "greater", paired = FALSE)#p-value = 1.318e-15
 
 
 

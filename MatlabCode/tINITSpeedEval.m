@@ -106,4 +106,16 @@ end
 
 save('../data/new_tinit_exec_times.mat', 'new_tinit_exec_times');
 
+new_tinit_exec_times2 = nan(n_models, 1);
 
+%here we run it with the second step
+for i = 1:n_models
+    disp(['running model: ' num2str(i)])
+    tic 
+    mres = ftINIT(prepDataHumanGEMEns,arrayDataNewAlg.tissues{i},[],[],arrayDataNewAlg,{},getHumanGEMINITSteps('1+1'),false,true,[]);
+    mres.id = arrayDataNewAlg.tissues{i};
+    gtex_models_newalg_tmp{i,1} = mres;
+    new_tinit_exec_times2(i) = toc();
+end
+
+save('../data/new_tinit_exec_times2.mat', 'new_tinit_exec_times2');

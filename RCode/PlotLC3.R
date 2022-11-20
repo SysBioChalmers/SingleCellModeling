@@ -59,11 +59,42 @@ cl1 = color_list[c(1,2,4,5,7,9,10,12,13,15)]
 cl2 = color_list[c(3,6,8,11,14,16)]
 cl = c(cl2,cl1)
 
-pC = ggplot(df, aes(x = x, y = y, color=tissue, shape=tissue)) +
+explVar <- function(pcaData, pc) {
+  eigs <- pcaData$sdev^2
+  return (eigs[pc] / sum(eigs))
+}
+
+
+pSupFig = ggplot(df, aes(x = x, y = y, color=tissue, shape=tissue)) +
   geom_point(size=2, stroke = 2) +
   scale_color_manual(values = cl, labels = labels) +
   scale_shape_manual(values =               c(2,1,3,3,2,3,3,3,3,3,4,2,3,3,1,1), labels=labels) +
-  ggplot2::labs(y=expression("PC 2"), x="PC 1", title="Structural comparison") +
+  ggplot2::labs(y=paste0("PC 2 (", round(explVar(res, 2),digits=3)*100, "%)"), x=paste0("PC 1 (", round(explVar(res, 1),digits=3)*100, "%)")) +
+  ggplot2::theme_bw() + #+ ggplot2::theme(legend.position=legendPos, legend.title = element_blank())
+  ggplot2::theme(panel.background = element_rect("white", "white", 0, 0, "white"), panel.grid.major= element_blank(),panel.grid.minor= element_blank()) +
+  ggplot2::theme(legend.title = element_blank()) +
+  ggplot2::theme(legend.title = element_blank(),legend.position="right", legend.text=element_text(size=14)) + #guides(colour = guide_legend(nrow = 4), size = guide_legend(nrow = 4), linetype = guide_legend(nrow = 4)) +
+  ggplot2::theme(text = element_text(size=14),
+                 axis.text.x = element_text(color='black', size=14),
+                 axis.text.y = element_text(color='black', size=14))
+pSupFig
+
+ggsave(
+  paste0(fig____path, "Fig4CSup.png"),
+  plot = pSupFig,
+  width = 6, height = 5, dpi = 300)
+
+
+
+shape = factor(c(2,1,3,3,2,3,3,3,3,3,4,2,3,3,1,1), 1:4, c("Epithelieal", "Myeloid", "Lymphocytes", "Mast"))
+
+df2 = tibble(x=x, y=y, shape = shape)
+
+
+pC = ggplot(df2, aes(x = x, y = y, shape=shape)) +
+  geom_point(size=2, stroke = 2) +
+  scale_shape_manual(values = 1:4) +
+  ggplot2::labs(y=paste0("PC 2 (", round(explVar(res, 2),digits=3)*100, "%)"), x=paste0("PC 1 (", round(explVar(res, 1),digits=3)*100, "%)"), title="Structural comparison") +
   ggplot2::theme_bw() + #+ ggplot2::theme(legend.position=legendPos, legend.title = element_blank())
   ggplot2::theme(panel.background = element_rect("white", "white", 0, 0, "white"), panel.grid.major= element_blank(),panel.grid.minor= element_blank()) +
   ggplot2::theme(legend.title = element_blank()) +
@@ -82,6 +113,9 @@ ggsave(
   paste0(fig____path, "Fig4C.eps"),
   plot = pC,
   width = 6, height = 5, dpi = 300)
+
+
+
 
 ####################################
 # Tasks comparison

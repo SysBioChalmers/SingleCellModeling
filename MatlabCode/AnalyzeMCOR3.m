@@ -71,3 +71,17 @@ s_5.sampleIds = sampleIds5;
 s_5.subSys = baseModel.subSystems;
 save('../data/MCOR3/MCOR3_rxns_run_5.mat', 's_5')
 
+%also extract data for supplementary fig about bootstrap variation
+bootstrapJaccs = nan(50, length(sampleIds5));
+for i = 1:length(sampleIds5)
+    disp(num2str(i))
+    bootstrapJaccs(:,i) = getBootstrapJaccardData(['../data/MCOR3/Run5/Bootstrap_' sampleIds5{i} '_models.mat'], baseModel);
+end
+
+s = struct();
+s.sampleIds = sampleIds5;
+s.bootstrapJaccs = bootstrapJaccs;
+
+save('../data/MCOR3/MCOR3_bootstrap_jacc.mat', 's')
+
+

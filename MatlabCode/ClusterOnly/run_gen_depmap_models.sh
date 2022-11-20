@@ -8,7 +8,7 @@
 
 # instead of using the "SBATCH -o run_init-X.log" line here,
 # include the flag "-o run_init-%A_%a.log" in the sbatch submission command:
-# sbatch -o run_init_depmap-%A-%a.log --array=1-10 run_gen_depmap_models.sh
+# sbatch -o logs/run_init_depmap-%A-%a.log --array=1-40 run_gen_depmap_models.sh
 
 module load MATLAB/2019a
 module load GCCcore/10.3.0

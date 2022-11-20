@@ -16,9 +16,9 @@ celltypes = x.DepMap_ID;
 
 % this code is weird because there are "NA" entries in the table that
 % change entire columns to strings
-col_types = table2cell(varfun(@class, x))';
-cell_col = x.Properties.VariableNames(ismember(col_types,'cell'))';
-cell_col = setdiff(cell_col,'DepMap_ID');  % skip the gene column
+%col_types = table2cell(varfun(@class, x))';
+%cell_col = x.Properties.VariableNames(ismember(col_types,'cell'))';
+%cell_col = setdiff(cell_col,'DepMap_ID');  % skip the gene column
 %This seems to no longer be an issue
 %for i = 1:numel(cell_col)
 %    x.(cell_col{i})(ismember(x.(cell_col{i}), 'NA')) = {'NaN'};
@@ -56,7 +56,7 @@ expdata.gene_effect = x;
 %                         
 
 % load reference model (Human-GEM)
-x = load('../data//tINIT_inputs_human.mat');
+x = load('../data/tINIT_inputs_human.mat');
 refModel = x.model;
 
 % translate refModel genes to symbols
@@ -64,19 +64,27 @@ refModel = x.model;
     translateGrRules(refModel.grRules, 'Name');
 
 
-allFiles = {'../data/init_models_depmap15-eGenes.mat';
-            '../data/depmap_models_newalg-eGenes.mat'
-            };
+allFiles = cell(2,1);
+allFiles{1} = cell(40,1);
+allFiles{2} = cell(40,1);
 allOutFiles = {'../data/geneEss_old_tINIT.txt';
-            '../data/geneEss_newalg.txt'
+            '../data/geneEss_newalg.txt';
+            '../data/geneEss_newalg2.txt'
             };
+for i = 1:40
+    allFiles{1}{i} = ['../data/DepMap/tINIT/init_models_depmap15-eGenes-' num2str(i) '.mat'];
+    allFiles{2}{i} = ['../data/DepMap/ftINIT/depmap_models_newalg-eGenes-' num2str(i) '.mat'];
+    allFiles{3}{i} = ['../data/DepMap/ftINIT2/depmap_models_newalg-eGenes-' num2str(i) '.mat'];
+end
+
 
 for j = 1:length(allFiles)
         
     % load and merge gene essentiality results
-    files = allFiles(j);
+    files = allFiles{j};
     eGenesAll = {};
     for i = 1:numel(files)
+        disp(i)
         load(files{i})
         if i == 1
             eGenesAll = eGenes;
@@ -91,7 +99,6 @@ for j = 1:length(allFiles)
     % re-organize essentialGenes logical matrices into a uniform 3D matrix,
     % where rows represent genes, columns are tasks, and the 3rd dimension is
     % different cell lines.
-    eGenes.essentialMat = false(numel(refModel.genes), numel(eGenes.taskList), numel(eGenes.tissues));
     for i = 1:numel(eGenes.tissues)
         [hasMatch,ind] = ismember(refModel.genes, eGenes.geneList{i});
         eGenes.essentialMat(hasMatch,:,i) = eGenes.essentialGenes{i}(ind(hasMatch),:);

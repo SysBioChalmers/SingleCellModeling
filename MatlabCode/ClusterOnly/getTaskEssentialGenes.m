@@ -1,21 +1,10 @@
-function eGenes = getTaskEssentialGenes(models_file)
+function eGenes = getTaskEssentialGenes(models_file_start, chunk)
 % Identify genes essential for different tasks in different models.
 % This code is largely copied from the Human1 paper
 %
 % Input:
 %
-%   models_file  Path of .mat file containing a cell array of tINIT models.
-%                If "models" is a number, then it will search the current
-%                directory for a file named "init_models-#.mat".
-%
-%   task_file    Path of .mat file containing the metabolic tasks formatted
-%                as a structure (i.e., generated using the parseTaskList
-%                function).
-%                Do NOT specify the path of a .xlsx file, as it is better
-%                to avoid the use of java on the cluster (required for
-%                parsing the Excel task file format).
-%
-%
+%   models_file_start  Start of path of .mat file containing a cell array of tINIT models.
 %
 % Output:
 %
@@ -28,12 +17,9 @@ function eGenes = getTaskEssentialGenes(models_file)
 %                        to genes (in geneList) and columns to tasks (in
 %                        taskList). Entries in the matrix are true when a
 %                        gene is essential for a task, and false otherwise.
-%
-%
-% Usage:
-%
-%   eGenes = getTaskEssentialGenes(INIT_output, refModel, taskStruct);
-%
+
+models_file = [models_file_start num2str(chunk) '.mat' ];
+out_filename = [models_file_start 'eGenes-' num2str(chunk) '.mat'];
 
 % verify that the cluster node has sufficient CPUs available
 x = parcluster('local');
@@ -100,7 +86,5 @@ eGenes.geneList = geneList;
 eGenes.essentialGenes = allEssentials;
 
 % save eGenes structure
-out_filename = strcat(regexprep(models_file, '.mat', ''), '-eGenes.mat');
 save(out_filename, 'eGenes');
-
 

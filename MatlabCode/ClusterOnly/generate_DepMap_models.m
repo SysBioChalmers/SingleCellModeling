@@ -32,7 +32,7 @@ load('DepMap/arrayDataDepMap.mat')
 
 load('tINIT_inputs_human.mat');
 
-subsetToUse = 1:15;
+subsetToUse = 1:length(arrayDataDepMap.tissues);
 
 %replace the arrayData with the DepMap array data
 arrayData.genes = arrayDataDepMap.genes;
@@ -41,7 +41,7 @@ arrayData.levels = arrayDataDepMap.levels(:,subsetToUse);
 
 
 % define chunks into which data will be broken up for parallelization
-nChunks = 10;
+nChunks = 40;
 indx = round(linspace(0, numel(arrayData.tissues), nChunks+1))';
 model_chunks = arrayfun(@(i) (indx(i)+1:indx(i+1))', (1:nChunks)', 'UniformOutput', false);
 if strcmpi(chunk, 'test')
@@ -81,7 +81,7 @@ for i = start_ind:n_models
     
     % save results
     if isnumeric(chunk)
-        filename = strcat('DepMap/init_models_depmap15-',num2str(chunk));
+        filename = strcat('DepMap/tINIT/init_models_depmap15-',num2str(chunk));
     else
         filename = 'init_models_depmap15-TEST';
     end

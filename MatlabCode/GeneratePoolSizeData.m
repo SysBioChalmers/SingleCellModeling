@@ -93,6 +93,20 @@ rng(1);
 rng(1);
 [psSamplesCont,poolSizesCont] = genPoolSizeSamplesWithContamination(lcc4t, lcc4c, 500, 5000, 8, numRep, [0 .02 .05 .1 .2]);
 
+arrayDataCont = cell(5,1);
+for i = 1:5
+    samp = psSamplesCont{i};
+    samp = TPM(samp);
+    arrayData = struct();
+    arrayData.genes = samp.genes;
+    arrayData.tissues = samp.sampleIds;
+    arrayData.threshold = 1;
+    arrayData.levels = samp.data;
+    arrayDataCont{i} = arrayData;
+end
+
+save('../data/contamination/PSPoolSizesCont.mat','arrayDataCont', 'poolSizesCont')
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Generate data for model generation
