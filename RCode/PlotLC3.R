@@ -82,7 +82,7 @@ pSupFig
 ggsave(
   paste0(fig____path, "Fig4CSup.png"),
   plot = pSupFig,
-  width = 6, height = 5, dpi = 300)
+  width = 8, height = 5, dpi = 300)
 
 
 

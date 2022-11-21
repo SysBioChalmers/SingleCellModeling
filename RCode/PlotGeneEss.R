@@ -1,4 +1,5 @@
 library(ggplot2)
+library(tidyverse)
 
 figPath = "Z:/projects/Single-cell modeling/figures/"
 
@@ -46,12 +47,12 @@ setwd("C:/Work/MatlabCode/projects/SingleCellModeling/SingleCellModeling")
   ggsave(
     paste0(figPath, "FigGeneEss.png"),
     plot = p1B,
-    width = 2.5, height = 3, dpi = 300)
+    width = 3.5, height = 3.2, dpi = 300)
   
   ggsave(
     paste0(figPath, "FigGeneEss.eps"),
     plot = p1B,
-    width = 2.5, height = 3, dpi = 300)
+    width = 3.5, height = 3.2, dpi = 300)
   
   
 ########################################
@@ -98,12 +99,79 @@ setwd("C:/Work/MatlabCode/projects/SingleCellModeling/SingleCellModeling")
   ggsave(
     paste0(figPath, "FigExecTimes.png"),
     plot = p1C,
-    width = 2.5, height = 3, dpi = 300)
+    width = 3.5, height = 3.2, dpi = 300)
   
   ggsave(
     paste0(figPath, "FigExecTimes.eps"),
     plot = p1C,
-    width = 2.5, height = 3, dpi = 300)
+    width = 3.5, height = 3.2, dpi = 300)
   
   
-    
+  ############################################
+  # Supplementary figs - model statistics
+  ############################################
+  
+  # load data
+
+  library(R.matlab)
+  d = readMat("data/DepMap/ModelStatData.mat")$stats
+  nrtINIT = d[[1]][[1]][,,1]$numRxns
+  nrgtINIT = d[[1]][[1]][,,1]$numRxnsWithGpr
+  nrftINIT = d[[2]][[1]][,,1]$numRxns
+  nrgftINIT = d[[2]][[1]][,,1]$numRxnsWithGpr
+  nrftINIT2 = d[[3]][[1]][,,1]$numRxns
+  nrgftINIT2 = d[[3]][[1]][,,1]$numRxnsWithGpr
+  
+  names = c("tINIT","ftINIT 1+0", "ftINIT 1+1")
+  
+  
+  
+  df = tibble(x = factor(rep(1:3, 1, each=length(nrtINIT)), 1:3, names), y=c(nrtINIT, nrftINIT, nrftINIT2));
+  
+  color_palette <- c('#B5D39B','#6B97BC','#E7B56C')  # light green, light blue, light yellow
+  
+  pSA = ggplot(df, aes(x = x, y = y, fill = x)) +
+    geom_violin(trim=F, show.legend=F) +
+    scale_fill_manual(values=color_palette) +
+    theme_classic() + 
+    ylab('No. reactions') +
+    xlab('') +
+    ggtitle('Total number of reactions') +
+    theme(text = element_text(size=14),
+          axis.text.x = element_text(angle=90, hjust=1, vjust=0.5,
+                                     color='black', size=14),
+          axis.text.y = element_text(color='black', size=14),
+          axis.line.x = element_blank())
+  #ylim(c(0.08,0.40)) # + #manipulate these numbers to include all data
+  #ylim(c(0,0.5)) # +
+  pSA
+  
+  df2 = tibble(x = factor(rep(1:3, 1, each=length(nrtINIT)), 1:3, names), y=c(nrgtINIT, nrgftINIT, nrgftINIT2));
+
+  pSB = ggplot(df2, aes(x = x, y = y, fill = x)) +
+    geom_violin(trim=F, show.legend=F) +
+    scale_fill_manual(values=color_palette) +
+    theme_classic() + 
+    ylab('No. reactions') +
+    xlab('') +
+    ggtitle('Number of reactions with GPR') +
+    theme(text = element_text(size=14),
+          axis.text.x = element_text(angle=90, hjust=1, vjust=0.5,
+                                     color='black', size=14),
+          axis.text.y = element_text(color='black', size=14),
+          axis.line.x = element_blank())
+  #ylim(c(0.08,0.40)) # + #manipulate these numbers to include all data
+  #ylim(c(0,0.5)) # +
+  pSB
+  
+  figSup1 = ggarrange(pSA,pSB, nrow=1, ncol=2, labels=c("A","B"), font.label = list(size = 24))
+  
+  
+  ggsave(
+    paste0(figPath, "FigGeneEssSup.png"),
+    plot = figSup1,
+    width = 10, height = 5, dpi = 300)
+  
+  
+  
+  

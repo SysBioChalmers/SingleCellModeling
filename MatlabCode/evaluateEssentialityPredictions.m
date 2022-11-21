@@ -64,9 +64,10 @@ refModel = x.model;
     translateGrRules(refModel.grRules, 'Name');
 
 
-allFiles = cell(2,1);
+allFiles = cell(3,1);
 allFiles{1} = cell(40,1);
 allFiles{2} = cell(40,1);
+allFiles{3} = cell(40,1);
 allOutFiles = {'../data/geneEss_old_tINIT.txt';
             '../data/geneEss_newalg.txt';
             '../data/geneEss_newalg2.txt'
@@ -175,5 +176,53 @@ for j = 1:length(allFiles)
     outfile = allOutFiles{j};
     writecell(results, outfile, 'Delimiter', '\t');
 end
+
+
+%% Now get model statistics
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%% Load the models
+
+% load reference model (Human-GEM)
+x = load('../data/tINIT_inputs_human.mat');
+refModel = x.model;
+
+allFilesTempl = {'../data/DepMap/tINIT/init_models_depmap15-';
+            '../data/DepMap/ftINIT/depmap_models_newalg-';
+            '../data/DepMap/ftINIT2/depmap_models_newalg-'
+            };
+        
+%allOutFiles2 = {'../data/ModelStats_old_tINIT.txt';
+%            '../data/ModelStats_newalg.txt';
+%            '../data/ModelStats_newalg2.txt'
+%            };
+
+
+stats = cell(length(allFilesTempl),1);
+
+for j = 1:length(allFilesTempl)
+    %get the stats
+    stat = struct();
+    stat.numRxns = []; %will be extended in the loop
+    stat.numRxnsWithGpr = []; %will be extended in the loop
+    for i = 1:40
+        disp(num2str(i))
+        if j == 1
+            x = load([allFilesTempl{j} num2str(i) '.mat']).init_models_depmap;
+        else
+            x = load([allFilesTempl{j} num2str(i) '.mat']).depmap_models_newalg;
+        end
+        for k = 1:length(x)
+            m = x{k};
+            stat.numRxns = [stat.numRxns;length(m.rxns)];
+            stat.numRxnsWithGpr = [stat.numRxnsWithGpr;sum(~strcmp(m.grRules,''))];
+        end
+    end
+
+    stats{j} = stat;
+end
+
+save('../data/DepMap/ModelStatData.mat', 'stats')
 
 
