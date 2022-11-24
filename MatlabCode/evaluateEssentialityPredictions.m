@@ -14,17 +14,6 @@ genes = regexprep(genes,"\s\(\d+\)'",'');
 
 celltypes = x.DepMap_ID;
 
-% this code is weird because there are "NA" entries in the table that
-% change entire columns to strings
-%col_types = table2cell(varfun(@class, x))';
-%cell_col = x.Properties.VariableNames(ismember(col_types,'cell'))';
-%cell_col = setdiff(cell_col,'DepMap_ID');  % skip the gene column
-%This seems to no longer be an issue
-%for i = 1:numel(cell_col)
-%    x.(cell_col{i})(ismember(x.(cell_col{i}), 'NA')) = {'NaN'};
-%    x.(cell_col{i}) = cellfun(@str2double, x.(cell_col{i}));
-%end
-
 % convert to matrix and transpose
 x = table2array(x(:,2:end))';
 
@@ -193,12 +182,6 @@ allFilesTempl = {'../data/DepMap/tINIT/init_models_depmap15-';
             '../data/DepMap/ftINIT2/depmap_models_newalg-'
             };
         
-%allOutFiles2 = {'../data/ModelStats_old_tINIT.txt';
-%            '../data/ModelStats_newalg.txt';
-%            '../data/ModelStats_newalg2.txt'
-%            };
-
-
 stats = cell(length(allFilesTempl),1);
 
 for j = 1:length(allFilesTempl)
