@@ -115,7 +115,7 @@ figurePath = "D:/SingleCellModeling/figures/"
 ggsave(
   paste0(figurePath, "MCOR3UMAPAllGenes.png"),
   plot = pA1, device = "png",
-  width = 4.5, height = 4.5, dpi = 300)
+  width = 4.5, height = 4.5, dpi = 1200)
 
 
 rm(seurObj)
@@ -165,7 +165,7 @@ figurePath = "D:/SingleCellModeling/figures/"
 ggsave(
   paste0(figurePath, "MCOR3UMAPMetGenes.png"),
   plot = pA2, device = "png",
-  width = 6.75, height = 4.5, dpi = 300)
+  width = 6.75, height = 4.5, dpi = 1200)
 
 rm(seurObj)
 rm(seurObjMet)

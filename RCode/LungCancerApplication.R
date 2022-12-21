@@ -185,7 +185,7 @@ figurePath = "D:/SingleCellModeling/figures/"
 ggsave(
   paste0(figurePath, "Fig 4A.png"),
   plot = p4A, device = "png",
-  width = 4.5, height = 5.92, dpi = 300)
+  width = 4.5, height = 5.92, dpi = 1200)
 
 p4C = DimPlot(seurObj, group.by = "authors_sample")
 p4C = p4C + labs(x="UMAP x", y="UMAP y", title="Tumor, per sample")
@@ -197,7 +197,7 @@ figurePath = "D:/SingleCellModeling/figures/"
 ggsave( #we get some warnings about the font, but it seems to work
   paste0(figurePath, "Fig 4C_2.png"),
   plot = p4C, device = "png",
-  width = 4.5, height = 6.14, dpi = 300)
+  width = 4.5, height = 6.14, dpi = 1200)
 
 
 
@@ -304,7 +304,7 @@ p4B
 ggsave(
   paste0(figurePath, "Fig 4B.png"),
   plot = p4B, device = "png",
-  width = 4.5, height = 5.5, dpi = 300)
+  width = 4.5, height = 5.5, dpi = 1200)
 
 
 #Now using metabolic genes:
